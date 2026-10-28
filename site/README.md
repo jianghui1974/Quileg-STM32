@@ -26,13 +26,11 @@ cd site && python3 -m http.server 8000
 
 ## 发布到 GitHub Pages
 
-两种方式任选：
+本仓库用 **GitHub Actions** 部署 `site/`（`.github/workflows/pages.yml`）：
 
-1. **从 `/site` 发布**：仓库 Settings → Pages → Source 选 `Deploy from a branch`，分支 `main`、目录 `/site`。
-2. **作为仓库根页面**：把 `site/` 里的文件复制到仓库根（`index.html`、`styles.css`、`assets/`），Pages 选 `/ (root)`。
-
-> 页面里的仓库/文档链接**已写死**为 `https://github.com/jianghui1974/Quileg-STM32`（不依赖 JS，禁用脚本也能点）。
-> **如果最终仓库名不是 `Quileg-STM32`，全局替换 `Quileg-STM32` 即可**（约 20 处，只影响链接）。
+- push 到 `main` 且改动 `site/**` 时自动部署；也可以在 Actions 里手动 `workflow_dispatch`
+- 线上地址：<https://jianghui1974.github.io/Quileg-STM32/>
+- 为什么不用"分支部署"：Pages 的分支模式只允许仓库根目录或 `/docs`，**不支持 `/site` 子目录**
 
 ## 待补
 

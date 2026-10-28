@@ -2,6 +2,8 @@
 
 > 一台会让电脑自己动手的小设备：**以标准 USB 键盘 + 鼠标的身份**，把编排好的操作真实地按出来。本项目是它的**前两代固件源码与上位机工具**，2024–2025 年的最终版本，现已归档。
 
+> 🌐 **在线主页**：<https://jianghui1974.github.io/Quileg-STM32/>　·　**源码**：<https://github.com/jianghui1974/Quileg-STM32>
+
 **English**: Quileg generations 1 (2024) and 2 (2025) — an STM32F103 based USB HID keyboard/mouse emulator driven over a 9600-bps serial line with 10-byte command packets. Firmware (final versions), the browser-based flow editor, the serial protocol spec, and documentation. Archived; the current project is [Quileg HID](https://jianghui1974.github.io/Quileg-HID/) (ESP32-S3, Bluetooth).
 
 | 多种外壳版本（左：白/蓝/黄；右：紫色多机组合） | 通电使用中，OLED 显示运行状态 |
