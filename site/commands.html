@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>命令字典 · Quileg STM32</title>
+<meta name="description" content="Quileg STM32 的完整串口命令字典：12 字节一帧、四种命令、96 条手工设计的字节。">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page-commands">
+
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="Quileg STM32 首页">
+    <img src="assets/logo.svg" alt="" width="30" height="30">
+    <span>Quileg <b>STM32</b></span>
+  </a>
+  <nav class="site-nav" aria-label="主导航">
+    <a href="index.html#features">能做什么</a>
+    <a href="index.html#lineage">两代</a>
+    <a href="index.html#assistant">上位机</a>
+    <a href="index.html#start">开始</a>
+    <a href="commands.html" class="active">命令字典</a>
+    <a href="index.html#docs">文档</a>
+  </nav>
+  <a class="btn btn-ghost btn-sm" href="https://github.com/jianghui1974/Quileg-STM32">GitHub</a>
+</header>
+
+<main>
+
+<section class="cmd-hero">
+  <p class="kicker">串口协议 · 完整命令表</p>
+  <h1>手搓一套<br><em>字节协议</em></h1>
+  <p class="lead">12 字节一帧、四种命令、96 条编排好的字节。没有现成标准可抄——当年就是一个字节一个字节试出来的：哪个位置放类型、哪个位置放键码、按住时间怎么塞进一个字节。</p>
+  <div class="badges"><span>9600 8N1</span><span>12 字节 / 帧</span><span>键盘 · 鼠标 · 蜂鸣器</span><span>固件只读前 10 字节</span></div>
+</section>
+
+<section class="cmd-anatomy">
+  <div class="section-head">
+    <h2>一帧是怎么排的</h2>
+    <p class="sub">整帧 12 字节：<code>FF</code> + 10 字节有效数据 + <code>FE</code>。下面用"帧内位置 / 有效数据下标"两种编号对照。</p>
+  </div>
+
+  <div class="table-scroll"><table class="frame-table">
+    <thead><tr><th>帧内</th><th>下标</th><th>键盘 0x01</th><th>鼠标 0x02</th><th>其它</th></tr></thead>
+    <tbody>
+      <tr><td><code>0</code></td><td>—</td><td colspan="3">帧头 <code>FF</code></td></tr>
+      <tr><td><code>1</code></td><td><code>[0]</code></td><td colspan="3">类型：<code>0x00</code> 空操作 · <code>0x01</code> 键盘 · <code>0x02</code> 鼠标 · <code>0x03</code> 蜂鸣器</td></tr>
+      <tr><td><code>2</code></td><td><code>[1]</code></td><td>修饰键位图</td><td>按键位图（左/右/中）</td><td>忽略</td></tr>
+      <tr><td><code>3</code></td><td><code>[2]</code></td><td>按住时长 × 10 ms（0 = 按住不抬）</td><td>X 位移（有符号）</td><td>忽略</td></tr>
+      <tr><td><code>4</code></td><td><code>[3]</code></td><td>键码 1</td><td>Y 位移（有符号）</td><td>忽略</td></tr>
+      <tr><td><code>5</code></td><td><code>[4]</code></td><td>键码 2</td><td>滚轮（有符号）</td><td>忽略</td></tr>
+      <tr><td><code>6–9</code></td><td><code>[5]–[8]</code></td><td>键码 3–6</td><td>保留，填 0</td><td>忽略</td></tr>
+      <tr><td><code>10</code></td><td><code>[9]</code></td><td colspan="2">重复次数（<strong>固件不读</strong>，由上位机展开）</td><td>同</td></tr>
+      <tr><td><code>11</code></td><td>—</td><td colspan="3">帧尾 <code>FE</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="design-grid">
+    <div class="design-card"><h3>为什么是 6 个键槽</h3><p>HID 键盘报告的固定结构就是"8 位修饰键 + 1 字节保留 + 6 个键码"。协议直接照抄这个布局，固件收到后几乎不用转换。</p></div>
+    <div class="design-card"><h3>按住时长塞进 1 字节</h3><p>以 10 ms 为单位，<code>0–255</code> 覆盖 <code>0–2.55 s</code>；<code>0</code> 表示"按住不放"，留给组合键和长按。</p></div>
+    <div class="design-card"><h3>重复次数放最后</h3><p>第 10 字节固件根本不读——它只是给上位机的提示：同一帧连发几次。<strong>协议不用改，就能表达"连按 5 次"。</strong></p></div>
+    <div class="design-card"><h3>为什么要 FF / FE</h3><p>串口没有包边界。帧头帧尾 + 状态机（等 FF → 收 10 字节 → 等 FE）让收包自带同步，错帧直接丢弃。</p></div>
+    <div class="design-card"><h3>为什么有 0x00</h3><p>空操作不是废物：它能当占位符、也能给流程文件加"等待"，让人读起来是分段的。</p></div>
+    <div class="design-card"><h3>12 字节的取舍</h3><p>1 类型 + 1 修饰 + 1 时长 + 6 键 + 1 重复 = 10，加头尾正好 12。9600 波特率下一帧约 12.5 ms。</p></div>
+  </div>
+</section>
+
+<section class="cmd-decode">
+  <div class="section-head">
+    <h2>拆三条给你看</h2>
+    <p class="sub">同一个 10 字节，换个类型字节，含义就完全不同。</p>
+  </div>
+
+  <div class="decode">
+    <div class="decode-title">⌘ + H（键盘）</div>
+    <pre><code><span class="tok">FF</span> <span class="tok">01</span> 08 0A <span class="tok">0B</span> 00 00 00 00 00 00 <span class="tok">FE</span>
+│  │  │  │  └─ 键码 0x0B = h
+│  │  │  └─ 按住 0x0A × 10 ms = 100 ms
+│  │  └─ 修饰键 0x08 = 左 GUI（⌘）
+│  └─ 类型 0x01 = 键盘
+└─ 帧头</code></pre>
+  </div>
+
+  <div class="decode">
+    <div class="decode-title">左键单击（鼠标）</div>
+    <pre><code><span class="tok">FF</span> <span class="tok">02</span> 01 00 00 00 00 00 00 00 00 <span class="tok">FE</span>   ← 按下
+<span class="tok">FF</span> <span class="tok">02</span> 00 00 00 00 00 00 00 00 00 <span class="tok">FE</span>   ← 松开
+│  │  │  └─ X / Y / 滚轮 全 0
+│  │  └─ 按键位图 0x01 = 左键
+│  └─ 类型 0x02 = 鼠标</code></pre>
+  </div>
+
+  <div class="decode">
+    <div class="decode-title">滚轮向下 1 格（鼠标）</div>
+    <pre><code><span class="tok">FF</span> <span class="tok">02</span> 00 00 00 <span class="tok">FF</span> 00 00 00 00 00 <span class="tok">FE</span>
+│  │  │  │  │  └─ 滚轮 0xFF = −1（向下）
+│  │  │  │  └─ 保留
+│  │  └─ 无按键、无位移
+│  └─ 类型 0x02</code></pre>
+  </div>
+</section>
+
+<section class="cmd-dict">
+  <div class="section-head">
+    <h2>完整字典</h2>
+    <p class="sub">96 条，按类别排。原始文档里有重复示例，这里按帧去重；预设按钮取自原始预设表。</p>
+  </div>
+
+  <div class="cmd-filter">
+    <input id="q" type="search" placeholder="搜索：键名、方向、十六进制（如 0x2C / 左 / Enter）…" aria-label="搜索命令">
+    <span id="count" class="cmd-count"></span>
+  </div>
+
+  <div id="tables">
+<div class="cmd-section">
+  <h3>预设按钮 <span class="count">7</span></h3>
+  <p class="cmd-sub">网页助手底部的快捷按钮（来自原始文档的预设表）。注意最后一字节是重复次数。</p>
+  <div class="table-scroll"><table class="cmd-table">
+    <thead><tr><th>键 / 动作</th><th>帧（12 字节）</th><th>说明</th></tr></thead>
+    <tbody>
+<tr><td class="name">空操作</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">00</span> 00 00 00 00 00 00 00 00 01 <span class="f-edge">FE</span></code></td><td class="note">重复 1</td></tr>
+<tr><td class="name">返回主页（⌘+H）</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 08 0A 0B 00 00 00 00 00 01 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x08 · 按住 100 ms</td></tr>
+<tr><td class="name">截屏（⌘+Shift+3）</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 0A 0A 20 00 00 00 00 00 01 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x0A · 键码 0x20</td></tr>
+<tr><td class="name">向右移动 50</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> 00 0A 00 00 00 00 00 00 05 <span class="f-edge">FE</span></code></td><td class="note">X +10 · 重复 5</td></tr>
+<tr><td class="name">向左移动 50</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> 00 F6 00 00 00 00 00 00 05 <span class="f-edge">FE</span></code></td><td class="note">X −10 · 重复 5</td></tr>
+<tr><td class="name">向上移动 50</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> 00 00 F6 00 00 00 00 00 05 <span class="f-edge">FE</span></code></td><td class="note">Y −10 · 重复 5</td></tr>
+<tr><td class="name">向下移动 50</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> 00 00 0A 00 00 00 00 00 05 <span class="f-edge">FE</span></code></td><td class="note">Y +10 · 重复 5</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="cmd-section">
+  <h3>键盘 · 字母 <span class="count">26</span></h3>
+  <p class="cmd-sub">键码 0x04–0x1D，按住 100 ms 后自动抬起。</p>
+  <div class="table-scroll"><table class="cmd-table">
+    <thead><tr><th>键 / 动作</th><th>帧（12 字节）</th><th>说明</th></tr></thead>
+    <tbody>
+<tr><td class="name">A</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">04</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x04</td></tr>
+<tr><td class="name">B</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">05</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x05</td></tr>
+<tr><td class="name">C</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">06</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x06</td></tr>
+<tr><td class="name">D</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">07</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x07</td></tr>
+<tr><td class="name">E</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">08</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x08</td></tr>
+<tr><td class="name">F</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">09</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x09</td></tr>
+<tr><td class="name">G</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">0A</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x0a</td></tr>
+<tr><td class="name">H</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">0B</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x0b</td></tr>
+<tr><td class="name">I</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">0C</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x0c</td></tr>
+<tr><td class="name">J</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">0D</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x0d</td></tr>
+<tr><td class="name">K</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">0E</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x0e</td></tr>
+<tr><td class="name">L</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">0F</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x0f</td></tr>
+<tr><td class="name">M</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">10</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x10</td></tr>
+<tr><td class="name">N</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">11</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x11</td></tr>
+<tr><td class="name">O</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">12</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x12</td></tr>
+<tr><td class="name">P</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">13</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x13</td></tr>
+<tr><td class="name">Q</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">14</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x14</td></tr>
+<tr><td class="name">R</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">15</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x15</td></tr>
+<tr><td class="name">S</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">16</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x16</td></tr>
+<tr><td class="name">T</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">17</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x17</td></tr>
+<tr><td class="name">U</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">18</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x18</td></tr>
+<tr><td class="name">V</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">19</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x19</td></tr>
+<tr><td class="name">W</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">1A</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x1a</td></tr>
+<tr><td class="name">X</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">1B</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x1b</td></tr>
+<tr><td class="name">Y</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">1C</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x1c</td></tr>
+<tr><td class="name">Z</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">1D</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x1d</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="cmd-section">
+  <h3>键盘 · 数字 <span class="count">10</span></h3>
+  <p class="cmd-sub">键码 0x1E–0x27。</p>
+  <div class="table-scroll"><table class="cmd-table">
+    <thead><tr><th>键 / 动作</th><th>帧（12 字节）</th><th>说明</th></tr></thead>
+    <tbody>
+<tr><td class="name">1</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">1E</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x1e</td></tr>
+<tr><td class="name">2</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">1F</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x1f</td></tr>
+<tr><td class="name">3</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">20</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x20</td></tr>
+<tr><td class="name">4</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">21</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x21</td></tr>
+<tr><td class="name">5</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">22</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x22</td></tr>
+<tr><td class="name">6</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">23</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x23</td></tr>
+<tr><td class="name">7</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">24</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x24</td></tr>
+<tr><td class="name">8</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">25</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x25</td></tr>
+<tr><td class="name">9</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">26</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x26</td></tr>
+<tr><td class="name">0</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">27</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x27</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="cmd-section">
+  <h3>键盘 · 符号与编辑键 <span class="count">22</span></h3>
+  <p class="cmd-sub">空格、标点、Enter、Esc、Tab、方向与翻页键等。</p>
+  <div class="table-scroll"><table class="cmd-table">
+    <thead><tr><th>键 / 动作</th><th>帧（12 字节）</th><th>说明</th></tr></thead>
+    <tbody>
+<tr><td class="name">抬起所有键</td><td class="frame"><code>FF 01 00 00 00 00 00 00 00 00 00 FE</code></td><td class="note">按住时长 0 → 不自动抬；用于清空按键状态</td></tr>
+
+<tr><td class="name">Enter</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">28</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x28</td></tr>
+<tr><td class="name">Esc</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">29</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x29</td></tr>
+<tr><td class="name">0x2B</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">2B</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x2b</td></tr>
+<tr><td class="name">0x2C</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">2C</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x2c</td></tr>
+<tr><td class="name">0x2D</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">2D</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x2d</td></tr>
+<tr><td class="name">0x2E</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">2E</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x2e</td></tr>
+<tr><td class="name">0x2F</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">2F</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x2f</td></tr>
+<tr><td class="name">]</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">30</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x30</td></tr>
+<tr><td class="name">\\</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">31</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x31</td></tr>
+<tr><td class="name">;</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">33</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x33</td></tr>
+<tr><td class="name">'</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">34</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x34</td></tr>
+<tr><td class="name">`</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">35</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x35</td></tr>
+<tr><td class="name">,</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">36</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x36</td></tr>
+<tr><td class="name">.</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">37</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x37</td></tr>
+<tr><td class="name">/</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">38</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x38</td></tr>
+<tr><td class="name">Caps Lock</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">39</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x39</td></tr>
+<tr><td class="name">0x4A</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">4A</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x4a</td></tr>
+<tr><td class="name">0x4B</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">4B</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x4b</td></tr>
+<tr><td class="name">0x4D</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">4D</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x4d</td></tr>
+<tr><td class="name">0x4E</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">4E</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x4e</td></tr>
+<tr><td class="name">Num Lock</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 00 0A <span class="f-key">53</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">键码 0x53</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="cmd-section">
+  <h3>键盘 · 组合键 <span class="count">10</span></h3>
+  <p class="cmd-sub">修饰键位图 + 一个普通键码；按住时长可调。</p>
+  <div class="table-scroll"><table class="cmd-table">
+    <thead><tr><th>键 / 动作</th><th>帧（12 字节）</th><th>说明</th></tr></thead>
+    <tbody>
+<tr><td class="name">Command + h 返回主页</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 08 0A <span class="f-key">0B</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x08 · 按住 100 ms</td></tr>
+<tr><td class="name">长按 Command 一秒 显示快捷键</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 08 64 <span class="f-key">00</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x08 · 按住 1000 ms</td></tr>
+<tr><td class="name">截屏</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 0A 0A <span class="f-key">20</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x0A · 按住 100 ms</td></tr>
+<tr><td class="name">按下'Ctrl'和'C'组合键并保持100毫秒</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 01 0A <span class="f-key">06</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x01 · 按住 100 ms</td></tr>
+<tr><td class="name">按下'Shift'和'1'组合键并保持100毫秒</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 02 0A <span class="f-key">1E</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x02 · 按住 100 ms</td></tr>
+<tr><td class="name">按下'Alt'和'Tab'组合键并保持100毫秒</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 04 0A <span class="f-key">2B</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x04 · 按住 100 ms</td></tr>
+<tr><td class="name">按下'GUI'和'R'组合键并保持100毫秒</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 08 0A <span class="f-key">15</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x08 · 按住 100 ms</td></tr>
+<tr><td class="name">按下'Ctrl'、'Shift'和'Esc'组合键并保持100毫秒</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 03 0A <span class="f-key">29</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x03 · 按住 100 ms</td></tr>
+<tr><td class="name">按下'Ctrl'、'Alt'和'Del'组合键并保持100毫秒</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 05 0A <span class="f-key">4C</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x05 · 按住 100 ms</td></tr>
+<tr><td class="name">按下'Ctrl'、'Shift'、'Alt'和'F4'组合键并保持100毫秒</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">01</span> 07 14 <span class="f-key">3D</span> 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">修饰键 0x07 · 按住 200 ms</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="cmd-section">
+  <h3>鼠标 <span class="count">20</span></h3>
+  <p class="cmd-sub">按键位图 + 相对位移 + 滚轮。每帧只发一次 HID 报告。</p>
+  <div class="table-scroll"><table class="cmd-table">
+    <thead><tr><th>键 / 动作</th><th>帧（12 字节）</th><th>说明</th></tr></thead>
+    <tbody>
+<tr><td class="name">左键按下</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">01</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x01 · X +0 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">松开所有键</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +0 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">右键按下</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">02</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x02 · X +0 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">中键按下</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">04</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x04 · X +0 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">向右移动 16</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">10</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +16 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">向左移动 16</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">F0</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X -16 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">向上移动 17</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">EF</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +0 · Y -17 · 滚轮 +0</td></tr>
+<tr><td class="name">向下移动 16</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">10</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +0 · Y +16 · 滚轮 +0</td></tr>
+<tr><td class="name">滚轮向上 1</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">01</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +0 · Y +0 · 滚轮 +1</td></tr>
+<tr><td class="name">滚轮向下 1</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">FF</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +0 · Y +0 · 滚轮 -1</td></tr>
+<tr><td class="name">移到右上角并按下左键</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">01</span> <span class="f-key">10</span> <span class="f-key">EF</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x01 · X +16 · Y -17 · 滚轮 +0</td></tr>
+<tr><td class="name">按住左键向右下拖拽</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">01</span> <span class="f-key">10</span> <span class="f-key">10</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x01 · X +16 · Y +16 · 滚轮 +0</td></tr>
+<tr><td class="name">移到左下角并按下右键</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">02</span> <span class="f-key">F0</span> <span class="f-key">10</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x02 · X -16 · Y +16 · 滚轮 +0</td></tr>
+<tr><td class="name">向左移动并按住中键</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">04</span> <span class="f-key">F8</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x04 · X -8 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">快速右移 + 滚轮向下</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">30</span> <span class="f-key">00</span> <span class="f-key">FF</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +48 · Y +0 · 滚轮 -1</td></tr>
+<tr><td class="name">移到右下角 + 滚轮向上</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">00</span> <span class="f-key">20</span> <span class="f-key">20</span> <span class="f-key">01</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x00 · X +32 · Y +32 · 滚轮 +1</td></tr>
+<tr><td class="name">按住右键右移（多帧拖拽）</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">02</span> <span class="f-key">10</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x02 · X +16 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">按住右键右移 32</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">02</span> <span class="f-key">20</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x02 · X +32 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">按住右键右移 48</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">02</span> <span class="f-key">30</span> <span class="f-key">00</span> <span class="f-key">00</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x02 · X +48 · Y +0 · 滚轮 +0</td></tr>
+<tr><td class="name">按住左键 + 滚轮向下</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">02</span> <span class="f-key">01</span> <span class="f-key">00</span> <span class="f-key">00</span> <span class="f-key">FF</span> 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">按键 0x01 · X +0 · Y +0 · 滚轮 -1</td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="cmd-section">
+  <h3>蜂鸣器 <span class="count">1</span></h3>
+  
+  <div class="table-scroll"><table class="cmd-table">
+    <thead><tr><th>键 / 动作</th><th>帧（12 字节）</th><th>说明</th></tr></thead>
+    <tbody>
+<tr><td class="name">蜂鸣器</td><td class="frame"><code><span class="f-edge">FF</span> <span class="f-type">03</span> 00 00 00 00 00 00 00 00 00 <span class="f-edge">FE</span></code></td><td class="note">响 30 ms，并翻转一次 LED</td></tr>
+    </tbody>
+  </table></div>
+</div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="foot-bottom" style="margin-top:0;border-top:none;padding-top:0">
+    <p><strong style="color:#fff">Quileg STM32</strong> · 串口命令字典 · 已归档，不提供技术支持与维护</p>
+    <p>帧格式与命令来自当年的《键盘鼠标串行命令》文档；<a href="index.html">返回首页</a> · <a href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/protocol.md">协议说明</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var q = document.getElementById('q');
+  var count = document.getElementById('count');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.cmd-section'));
+  function apply() {
+    var v = q.value.trim().toLowerCase();
+    var shown = 0;
+    sections.forEach(function (sec) {
+      var rows = Array.prototype.slice.call(sec.querySelectorAll('tbody tr'));
+      var vis = 0;
+      rows.forEach(function (tr) {
+        var hit = !v || tr.textContent.toLowerCase().indexOf(v) !== -1;
+        tr.style.display = hit ? '' : 'none';
+        if (hit) vis++;
+      });
+      sec.style.display = vis ? '' : 'none';
+      shown += vis;
+    });
+    count.textContent = v ? shown + ' 条匹配' : '';
+  }
+  q.addEventListener('input', apply);
+  apply();
+})();
+</script>
+</body>
+</html>

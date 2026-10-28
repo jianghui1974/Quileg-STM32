@@ -1,0 +1,23 @@
+# 构建产物与 IDE 本机文件
+Debug/
+Release/
+*.o
+*.d
+*.elf
+*.hex
+*.bin
+*.map
+*.su
+
+# STM32CubeIDE / Eclipse 本机状态
+.settings/
+.metadata/
+*.launch
+**/Debug/
+**/.settings/
+
+# macOS
+.DS_Store
+
+# 注意：.cproject / .project / .mxproject / *.ioc 必须保留，
+# 它们是 CubeIDE 能直接打开并构建这个工程的前提。

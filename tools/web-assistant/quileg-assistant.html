@@ -1,0 +1,4166 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title data-translation-key="quilegAssistant">Quileg 助手</title>
+	<meta name="description" content="Quileg 助手">
+	<meta name="copyright" content="&copy; 2024-2025 Quileg · MIT License">
+	<meta name="author" content="JiangHui">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.css">
+	<style>
+	body {
+		font-family: Arial, sans-serif;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	hr{
+		border: 1px solid #ddd;
+        width: 100%;
+	}
+	.span_line{
+		margin-right: 5px;
+		color: #ccc
+	}
+	.header, .footer {
+		width: 100%;
+		max-width: 1200px;
+	}
+	.header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px 0;
+		border-bottom: 1px solid #ccc;
+	}
+	.header h1 {
+		margin: 0;
+	}
+	.help-link {
+		text-decoration: none;
+		color: #007BFF;
+		font-weight: bold;
+		margin-left: 15px;
+	}
+	.container {
+		display: flex;
+		max-width: 1200px;
+		width: 100%;
+		margin: 20px 0;
+		position: relative;
+	}
+	.left-column {
+		flex: 1;
+		background-color: #fff;
+		margin-right: 20px;
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+	.right-column {
+		background-color: #fff;
+		flex: 2;
+		display: flex;
+		padding: 20px;
+		border: 1px solid #ccc;
+		border-radius: 15px;
+		flex-direction: column;
+		position: relative;
+	}
+	.sub-container {
+		background-color: #f9f9f9;
+		padding: 20px 10px;
+		border: 1px solid #ddd;
+		border-radius: 10px;
+		position: relative;
+	}
+	.container-label {
+		position: absolute;
+		top: -12px;
+		left: 20px;
+		background-color: #fff;
+		padding: 0 5px;
+		font-size: 14px;
+		color: #666;
+	}
+    .hr-label {
+        padding: 0 5px;
+        font-size: 14px;
+        color: #666;
+    }
+	.footer {
+		display: flex;
+		justify-content: flex-end;
+		padding: 20px;
+		font-size: 14px;
+		color: #777;
+	}
+	@media (max-width: 768px) {
+		body {
+			padding: 0 15px;
+		}
+		.container {
+			flex-direction: column;
+		}
+		.left-column {
+			margin-right: 0;
+			margin-bottom: 20px;
+		}
+		.container-label {
+			display: none;
+		}
+		.sub-container h2 {
+			margin: 0;
+			cursor: pointer;
+			background-color: #ddd;
+			padding: 10px;
+			border-radius: 10px;
+		}
+		.sub-container-content {
+			display: none;
+			padding: 10px 0;
+		}
+	}
+	.language-selector-container {
+		display: flex;
+		align-items: center;
+	}
+	.language-selector {
+		border: none;
+		background: none;
+		font-size: 16px;
+		margin-left: 5px;
+		cursor: pointer;
+	}
+	button {
+		padding: 5px 15px;
+		margin-right: 5px;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+		background-color: #fff;
+		cursor: pointer;
+		transition: background-color 0.1s;
+	}
+	button:hover {
+		background-color: #ddd;
+	}
+	select, input[type="number"], input[type="text"] {
+		padding: 5px 10px;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+		margin: 0px 5px;
+	}
+	.dataDisplay-sent-data {
+		text-align: right;
+		color: #94caff;
+	}
+	.received-data {
+		text-align: left;
+		color: #74e6ae;
+	}
+	.received-data.same-data {
+		color: #74e6ae;
+	}
+	.received-data.different-data {
+		color: #ff78a8;
+	}
+	#statusDisplay {
+		border: 1px solid #ccc;
+		background-color: #272822;
+		padding: 10px;
+		border-radius: 5px;
+		margin-top: 10px;
+		height: 50px;
+		overflow-y: scroll;
+		font-size: 14px;
+	}
+	#statusDisplay::-webkit-scrollbar {
+		width: 0;
+		height: 0;
+	}
+	.statusDisplay-default-data{
+		text-align: left;
+		color: #F8F8F2;
+	}
+	.statusDisplay-warning-data{
+		text-align: left;
+		color: #80CBC4;
+	}
+	.statusDisplay-error-data{
+		text-align: left;
+		color: #F78C6C;
+	}
+	.dd-list:not(:empty) {
+		border-top: 1px solid #ccc;
+	    padding-top: 15px;
+	    margin-top: 5px;
+	}
+	.dd-handle {
+		border-radius: 5px;
+		padding: 5px 10px;
+		margin-right: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: move;
+	    height: 25px;
+	    width: 25px;
+	    color: #fff;
+		background-color: #000;
+   	}
+   	.dd-handle:hover {
+   	    color: #000000;
+    	background: #fff;
+	}
+	.dd-trash {
+		cursor: pointer;
+	    height: 25px;
+	    width: 25px;
+	    display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+	}
+	.dd-trash:hover {
+		color: #000;
+	}		
+	#error-message {
+		color: red;
+		font-weight: bold;
+		margin-top: 10px;
+	}
+	#bulkDataContainer {
+		max-width: 1000px;
+		margin: 20px 0;
+		padding: 20px;
+		border: 1px solid #ccc;
+		border-radius: 10px;
+		background-color: #f0f0f0;
+	}
+	#temporaryDataContainer {
+	}
+	.dd-item {
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		padding: 10px;
+		margin-bottom: 10px;
+		background-color: #fff;
+	}
+	.dd-item.selected {
+		background-color: #00B0CA; /* 蓝色 */
+	}
+	.data-line {
+		display: flex;
+		align-items: center;
+	}
+	.data-line label {
+		cursor: pointer;
+		color: #999;
+	}
+	.data-line label:hover {
+		color: #000;
+	}
+	.data-label {
+		cursor: default;
+		flex: 1;
+	}
+	.titleInput {
+		flex: 1;
+	}
+	.repeats-label{
+		color: #000!important;
+		margin-right: 15px;
+	}
+	.hidden {
+		display: none;
+	}
+	.executing {
+		border: 1px solid red;
+	}
+	.toolbar {
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		margin-bottom: 10px;
+		padding-bottom: 10px;
+		border-bottom: 1px solid #ddd;
+		border-radius: 5px 5px 0 0;
+	}
+    .toolbar-finally {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        border-radius: 5px 5px 0 0;
+    }
+    .toolbar-finally label{
+	    font-size: 14px;
+	    color: #666;
+    }
+    .toolbar-device{
+        display: flex;
+        align-items: center;
+        border-radius: 5px 5px 0 0;    	
+    }
+    .toolbar-right{
+        margin-left: auto;
+    }    
+	.nestable-handle {
+		display: none;
+	}
+	.dd-collapse {
+		display: none!important;
+	}
+	.dd-expand {
+		display: none!important;
+	}
+	.floating-container {
+		display: none;
+		position: fixed;
+		background-color: #fff;
+		border: 1px solid #ccc;
+		border-radius: 10px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		z-index: 995;
+		max-height: min-content;
+	    opacity: 0.9; /* 设置默认的半透明 */
+	    transition: opacity 0.3s ease-in-out; /* 添加渐变效果 */		
+	}
+	.floating-container:hover,
+	.floating-container:focus-within {
+	    opacity: 1; /* 鼠标悬停或焦点在其中时变为不透明 */
+	}	
+    .floating-container-dataDisplay {
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+    }
+    .floating-container-openSoftKeyboard {
+        bottom: 20px;
+        left: 400px;
+    }
+	.floating-container .floating-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		cursor: move;
+		padding: 0px 10px;
+	}
+	.floating-container .floating-header button {
+		display: flex;
+		align-items: center;
+		background: none;
+		border: none;
+		font-size: 20px;
+		cursor: pointer;
+		padding: 2px;
+	}
+	.floating-container .containerFloating-label {
+		background-color: #fff;
+		padding: 0 5px;
+		font-size: 14px;
+		color: #666;
+		top: 8px;
+	}
+	.floating-container .content {
+		position: relative;
+		height: 100%;
+	}
+	.floating-container .overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		cursor: move;
+		height: 200px;
+	}
+    #dataDisplay {
+        background-color: #272822;
+        height: 200px;
+        overflow-y: scroll;
+        font-size: 14px;
+        pointer-events: none;
+    }
+    #dataDisplay::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    .keyboard-content{
+        position: relative;
+        height: 100%;
+        display: flex;
+    }
+    .keyboard {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f0f0f0;
+    }
+    .keyboard-row {
+        display: flex;
+        flex-wrap: nowrap;
+        margin-bottom: 5px;
+    }
+
+    .keyboard-right {
+        margin: 10px;
+        width: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end; /* 使元素右对齐 */
+        justify-content: flex-end; /* 使子元素在容器底部 */
+        gap: 10px; /* 子元素之间的间距 */
+    }
+    .formatKeysshow-margin{
+        margin-right: 20px;
+    }
+    .formatKeysshow {
+        align-self: flex-end; /* 使元素右对齐 */
+        width: 100%; /* 根据需要调整宽度 */
+        margin-right: 15px;
+        text-align: right;
+    }
+
+    .keyboard_titleInput {
+        align-self: flex-end; /* 使元素右对齐 */
+    }
+
+    .addtoWorkflow {
+        align-self: flex-end; /* 使元素右对齐 */
+		background-color: #000;
+		color: #fff;
+    }
+
+    .key {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        flex: 1;
+        margin-right: 5px;
+        transition: background-color 0.1s;
+    }
+    .pressed {
+        background-color: #ddd;
+    }    
+    .wide-key {
+        flex: 2;
+    }
+    .extra-wide-key {
+        flex: 6;
+    }
+    .switch-container {
+        display: flex;
+        justify-content: flex-end;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        height: 24px;
+    }
+    .switch {
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+        position: relative;
+        top: 4px;
+    }
+    .switch input {
+        display: none;
+    }
+    .switch-label {
+        margin-right: 10px;
+        margin-left: 10px;
+        align-self: center;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #000000;
+        transition: .4s;
+        border-radius: 20px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #00A4EF;
+    }
+    input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+    .caps-lock-indicator {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        margin-right: 10px;
+        background-color: #000000; /* Initial color for off state */
+    }
+    .caps-lock-on {
+        background-color: #29d229; /* Color for on state */
+    }
+    .keyboard-message {
+        color: red;
+        font-weight: bold;
+    }
+    .icon{
+        pointer-events: none;
+    }
+	</style>
+    <style>
+        .scr_e_save-button,.mouse_e_save-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;   
+			background-color: #000;
+			color: #fff;                     
+        }
+        #scr_overlay,#mouse_overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #scr_tool,#mouse_tool {
+            position: relative;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 900px;
+            z-index: 1001;
+        }
+        #scr_tool .measureTheNumberOfMouseReturns,#mouse_tool .mouse {
+			font-size: 14px;
+			color: #666;
+		}
+        #scr_close-tool,#mouse_close-tool {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+	    	padding-right: 0px;
+    		padding-top: 0px;
+        }
+        #scr_close-tool:hover,#mouse_close-tool:hover {
+            background-color: white;
+        }
+        .scr_column-container ,.mouse_column-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .mouse_column-container {
+        	border-bottom: 1px solid #ccc;
+        	padding-bottom: 15px;
+        	margin-bottom: 15px;
+        }
+        .scr_column, .mouse_column {
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+        }
+        .scr_column img,.mouse_column img {
+            max-width: 100%;
+            height: auto;
+        }
+        .scr_column div,.mouse_column div{
+        	font-size: 14px;
+        	color: #666;
+        }
+        .scr_column .scr_column_input,.mouse_column .mouse_column_input{
+        	width: 180px;
+        }
+        .scr_column p,.mouse_column p{
+        	text-align: left;
+        }
+        .button-div {
+            display: inline-block;
+            padding: 15px;
+            padding-bottom: 30px;
+            background-color: white; /* 白色底色 */
+            color: black;
+            text-align: center; /* 居中文本 */
+            cursor: pointer;
+            border-radius: 5px;
+            width: 200px; /* 根据需要调整宽度 */
+            border: 1px solid #cccccc; /* 灰色边框 */
+            user-select: none;
+            transition: background-color 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease; /* 平滑过渡效果 */
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2); /* 更小更锐利的阴影 */
+        }
+        .button-div i {
+        	font-size: 30px;
+        	margin: 15px;
+        }
+        .button-div img {
+            width: 80%;
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto;
+        }
+
+        .button-div span {
+            display: block;
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .button-div:hover {
+            background-color: #00B0CA;
+            color: #ffffff;
+            box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1); /* 悬停时略深的锐利阴影 */
+        }
+
+        .button-div:active {
+        	color: #00B0CA;
+            background-color: #ffffff; /* 点击时的颜色*/
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 点击时阴影距离变小且更锐利 */
+            transform: translateY(1px); /* 按下时模拟下压效果 */
+        }
+
+        .button-fake {
+            display: inline-block;
+            background-color: white;
+            text-align: center;
+            width: 200px;
+            padding: 15px;
+        }
+        .button-fake img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .mouse_controls {
+        	margin-top: 15px;
+        	margin-bottom: 15px;
+        }
+        .mouse_combined, #calibration {
+        	margin-bottom: 15px;
+        }
+
+        .mouse_homing {
+        	margin-bottom: 4px;
+            display: inline-block;
+            background-color: white; /* 白色底色 */
+            color: black;
+            text-align: center; /* 居中文本 */
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #cccccc; /* 灰色边框 */
+            user-select: none;
+        }
+        .mouse_homing:hover {
+        	background-color: #00B0CA;
+        }
+        .mouse_homing i {
+        	font-size: 20px;
+        	margin: 15px;
+        }        
+        .mouse_homing_direction {
+        	background-color: #00B0CA;
+        }
+        .mouse_homing_direction i{
+        	color: #fff;
+        }
+        .display_none {
+        	display: none;
+        }
+        #show_mouse_holdDownTheButtonWhileMoving{
+        	border-top: 1px solid #ccc;
+        	padding-top: 15px;
+        }
+        .mouse_complete_checkbox {
+        	padding-top: 15px;
+        	padding-bottom: 15px;
+        	margin-bottom: 15px;
+        }
+        .mouse_complete_wheel {
+        	padding-top: 15px;
+        	border-bottom: 1px solid #ccc;
+        	padding-bottom: 15px;
+        	margin-bottom: 15px;
+        }
+        #mouse_calibration {
+        	padding-top: 15px;
+        	border-top: 1px solid #ccc;
+        }
+        #examples {
+        	margin-left: 0px;
+        }
+        #screenshot,#repeatExecution {
+        	margin-right: 0px;
+        }
+    </style>  
+	<script>
+	const translations = {
+		'zh-CN': {
+    		quilegAssistant: 'Quileg 助手',
+    		help: '帮助',
+    		QuilegConnection: '连接 Quileg',
+    		stagingFolder: '暂存夹',
+    		workflow: '操作流',
+            title: '标题',
+            title_placeholder: '标题',
+            addtoWorkflow: '添加到操作流',
+            keyboardMessage: '非特殊键超过6个！',
+            hold: '长按',
+            pahutnpa: '长按至下一流程到来',
+            laterandrelease: '毫秒后弹起',
+    		footerText: '© 2024-2025 Quileg · MIT License',
+    		selectQuileg: '选择 Quileg',
+    		noConnection: '无连接',
+    		readDeviceData: '读取设备数据',
+    		stopReadingDeviceData: '停止读取设备数据',
+    		dialogueMonitoring: '对话监控',
+    		inputData: '输入数据',
+    		keyboard: '键盘',
+    		mouse: '鼠标',
+    		screenshot: '截屏',
+            operationEmpty: '空操作',
+    		homeCommand: '返回主页',
+    		execute: '执行',
+			pause: '暂停',
+			continue: '继续',
+			stop: '停止',
+			endOfExecution: '结束',
+			stepExecution: '单步执行',
+			repeatExecution: '重复执行',
+    		examples: '载入范例',
+    		copyToClipboard: '拷贝',
+    		copyAllToClipboard: '全拷贝',
+    		pasteFromClipboard: '粘贴',
+    		clearTemporaryContainer: '清空',
+    		clearbulkDataContainer: '清空',
+    		importfile: '导入文件',
+    		saveToFile: '保存',
+            expandButton: '展开',
+            collapseButton: '折叠',
+    		interval: '间隔',
+    		milliseconds: '毫秒',
+    		save: '保存',
+    		cancel: '取消',
+            edit: '编辑',
+    		delete: 'x',
+    		controlledEquipment: '被控设备',
+            screenSize: '屏幕：',
+    		hexStringMustHaveAnEvenLength: '十六进制字符串的长度必须为偶数',
+    		yourBrowserDoesNotSupportTheWebSerialAPI: '您的浏览器不支持 Web Serial API。请使用支持 Web Serial API 的浏览器（如 Chrome 89 及以上版本）并在设置中启用该功能。',
+    		failedToselectQuileg: '选择 Quileg 失败: ',
+    		failedToOpenDevice: '打开设备失败: ',
+    		deviceOpened: '已打开设备：USB ',
+    		noDeviceSelected: '未选择设备',
+    		deviceClosed: '已关闭设备',
+    		failedToCloseDevice: '关闭设备失败: ',
+    		failedToReadDeviceData: '读取设备数据失败: ',
+    		failedToWriteDataToDevice: '设备写入数据失败: ',
+    		PleaseEnterTheHEXdataToBeSent: '请输入要发送的 HEX 数据（可包含空格）：',
+    		failedToSendFixedData: '发送固定数据失败: ',
+    		failedToSendData: '发送数据失败: ',
+    		measureTheNumberOfMouseReturns: '设置 - 测算鼠标归位次数',
+    		step: '步骤',
+    		results: '结果',
+    		homing: '归位',
+    		homing_0: '左下角归位',
+    		homing_1: '左上角归位',
+    		homing_2: '右上角归位',
+    		homing_3: '右下角归位',
+    		calibration: '校验',
+    		completed: '完成',
+    		scr_step1_text: '',
+    		scr_step2_text: '',
+    		scr_step3_text: '',
+    		homing_text: '如果无法确认鼠标初始位置衔接正确，请选择先归位鼠标，归位操作将被加入到流程开始。',
+    		step2_text: '',
+    		step3_text: '',
+    		pleaseenterthedevicename_placeholder: '请输入设备名称',
+    		devicename: '设备名称',
+    		mouseReturnCount: '鼠标归位次数',
+    		settings: '设置',
+    		multiclick: '多次点击',
+    		lowerLeftCornerHoming: '直到鼠标移到屏幕最左下角',
+	        upperRightCornerMovement: '直到鼠标移到屏幕最右上角',
+	        quoteToInputBox: '引用到输入框',
+	        mouseRightToMove: '鼠标右移',
+	        mouseLeftToMove: '鼠标左移',
+	        mouseUpToMove: '鼠标上移',
+	        mouseDownToMove: '鼠标下移',
+	        mouseRightAndUpToMove: '鼠标右上移',
+	        mouseRightAndDownToMove: '鼠标右下移',
+	        mouseLeftAndUpToMove: '鼠标左上移',
+			mouseLeftAndDownToMove: '鼠标左下移',
+			releaseTheMouseButton: '释放鼠标按键',
+	        addTheHomingOperationToTheWorkflow: '在流程中添加归位操作',
+	        moveToTargetArea: '移动到目标区域',
+	        moveToTargetArea_text: '使用键盘方向键，将鼠标移到目标区域。',
+	        button: '按键',
+	        xAndyAreCombinedAndMovedAtTheSameTime: 'x、y合并后同时移动（精度差不推荐）',
+	        holdDownTheButtonWhileMoving: '移动时按住鼠标按键',
+	        holdDown: '按住',
+			mouseLeftbutton: '鼠标左键',
+			mouseRightButton: '鼠标右键',
+			mouseMiddleButton: '鼠标中键',
+			moveToTheTargetAndPressTheMouseButtonAtTheSameTime: '移到目标后，同时按下鼠标键：',
+			wheel: '滚轮',
+			Use: '使用',
+			toEncapsulateProcessesIntoASingleUnit: '将流程封装成一组单元。',
+			wheelUp: '滚轮向上',
+            wheelDown: '滚轮向下',
+            appleDevice: '苹果设备'
+		},
+		'en': {
+    		quilegAssistant: 'Quileg Assistant',
+    		help: 'Help',
+    		QuilegConnection: 'Quileg Connection',
+    		stagingFolder: 'Staging Folder',
+    		workflow: 'Workflow',
+            title: 'Title',
+            title_placeholder: 'Title',
+            addtoWorkflow: 'Add to workflow',
+            keyboardMessage: 'Non-special keys limit exceeded!',
+            hold: 'Hold',
+            pahutnpa: 'Press and hold until the next process arrives',
+            laterandrelease: 'milliseconds later, release',
+    		footerText: '© 2024-2025 Quileg · MIT License',
+    		selectQuileg: 'Select Quileg',
+    		noConnection: 'No Connection',
+    		readDeviceData: 'Read device data',
+    		stopReadingDeviceData: 'Stop reading device data',
+    		dialogueMonitoring: 'Monitoring',
+    		inputData: 'Input Data',
+    		keyboard: 'Keyboard',
+    		mouse: 'Mouse',
+    		screenshot: 'Screenshot',
+            operationEmpty: 'Operation Empty',
+    		homeCommand: 'Home Command',
+    		execute: 'Execute',
+			pause: 'Pause',
+			continue: 'Continue',
+			stop: 'Stop',
+			endOfExecution: 'End of execution',
+			stepExecution: 'Step Execution',
+			repeatExecution: 'Repeat Execution',
+    		examples: 'Load Example',
+    		copyToClipboard: 'Copy',
+    		copyAllToClipboard: 'Copy All',
+    		pasteFromClipboard: 'Paste',
+    		clearTemporaryContainer: 'Clear',
+    		clearbulkDataContainer: 'Clear',
+    		importfile: 'Import',
+    		saveToFile: 'Save',
+            expandButton: 'Expand',
+            collapseButton: 'Collapse',
+    		interval: 'Interval',
+    		milliseconds: 'ms',
+    		save: 'Save',
+    		cancel: 'Cancel',
+    		delete: 'x',
+            edit: 'Edit',
+            controlledEquipment: 'Controlled equipment',
+            screenSize: 'Screen: ',
+    		hexStringMustHaveAnEvenLength: 'Hex string must have an even length',
+    		yourBrowserDoesNotSupportTheWebSerialAPI: 'Your browser does not support the Web Serial API. Please use a browser that supports the Web Serial API (such as Chrome version 89 and above) and enable this feature in the settings.',
+    		failedToselectQuileg: 'Failed to select Quileg: ',
+    		failedToOpenDevice: 'Failed to open device: ',
+    		deviceOpened: 'Device opened: USB ',
+    		noDeviceSelected: 'No Device Selected',
+    		deviceClosed: 'Device closed',
+    		failedToCloseDevice: 'Failed to close device: ',
+    		failedToReadDeviceData: 'Failed to read device data: ',
+    		failedToWriteDataToDevice: 'Failed to write data to device: ',
+    		PleaseEnterTheHEXdataToBeSent: 'Please enter the HEX data to be sent (spaces allowed).',
+    		failedToSendFixedData: 'Failed to send fixed data: ',
+    		failedToSendData: 'Failed to send data: ',
+    		measureTheNumberOfMouseReturns: 'Settings - Measure the number of mouse returns',
+    		step: 'Step',
+    		results: 'Results',
+    		homing: 'Homing',
+    		homing_0: 'Lower left corner homing',
+    		homing_1: 'Upper left corner homing',
+    		homing_2: 'Upper right corner homing',
+    		homing_3: 'Lower right corner homing',
+    		calibration: 'Calibration',
+    		completed: 'Completed',
+    		scr_step1_text: '',
+    		scr_step2_text: '',
+    		scr_step3_text: '',
+    		homing_text: 'If you cannot confirm that the initial mouse position is correctly articulated, choose to homing the mouse first, and the homing operation will be added to the start of the process.',
+    		step2_text: '',
+    		step3_text: '',
+    		pleaseenterthedevicename_placeholder: 'Please enter the device name',
+    		devicename: 'Device name',
+    		mouseReturnCount: 'Mouse Return Count',
+    		settings: 'Settings',
+    		multiclick: 'Multiclick',
+    		lowerLeftCornerHoming: 'Until the mouse moves to the bottom left corner of the screen.',
+	        upperRightCornerMovement: 'Until the mouse moves to the top right corner of the screen',
+	        quoteToInputBox: 'Quote to input box',
+	        mouseRightToMove: 'Mouse right to move',
+	        mouseLeftToMove: 'Mouse left to move',
+	        mouseUpToMove: 'Mouse up to move',
+	        mouseDownToMove: 'Mouse down to move',
+	        mouseRightAndUpToMove: 'Mouse right and up to move',
+	        mouseRightAndDownToMove: 'Mouse right and down to move',
+	        mouseLeftAndUpToMove: 'Mouse left and up to move',
+			mouseLeftAndDownToMove: 'Mouse left and down to move',
+			releaseTheMouseButton: 'Release the mouse button',
+	        addTheHomingOperationToTheWorkflow: 'Add the homing operation to the workflow',
+	        moveToTargetArea: 'Move to target area',
+	        moveToTargetArea_text: 'Use the keyboard arrow keys to move the mouse to the target area.',
+	        button: 'Button',
+	        xAndyAreCombinedAndMovedAtTheSameTime: 'x and y are combined and moved at the same time(not recommended for poor accuracy)',
+			holdDownTheButtonWhileMoving: 'Hold down the button while moving',
+			holdDown: 'Hold down',
+			mouseLeftbutton: 'Left mouse button',
+			mouseRightButton: 'Right mouse button',
+			mouseMiddleButton: 'Middle mouse button',
+			moveToTheTargetAndPressTheMouseButtonAtTheSameTime: 'Move to the target and press the mouse button at the same time:',
+			wheel: 'Wheel',
+			Use: 'Use',
+			toEncapsulateProcessesIntoASingleUnit: 'to encapsulate processes into a set of units.',
+			wheelUp: 'Wheel up',
+            wheelDown: 'Wheel down',
+            appleDevice: 'Apple device'
+		}
+	};
+
+	function setLanguage(language) {
+		document.querySelector('.header h1').textContent = translations[language].quilegAssistant;
+		document.querySelector('.help-link').textContent = translations[language].help;
+		document.querySelector('.QuilegConnection').textContent = translations[language].QuilegConnection;
+		document.querySelector('.stagingFolder').textContent = translations[language].stagingFolder;
+		document.querySelector('.controlledEquipment').textContent = translations[language].controlledEquipment;
+		document.querySelector('.workflow').textContent = translations[language].workflow;
+		document.querySelector('.footer').textContent = translations[language].footerText;
+
+		document.querySelectorAll('title').forEach(title => {
+    		const key = title.getAttribute('data-translation-key');
+    		if (key) {
+    			title.textContent = translations[language][key];
+    		}
+		});
+
+		document.querySelectorAll('button').forEach(button => {
+    		const key = button.getAttribute('data-translation-key');
+    		if (key) {
+    			button.textContent = translations[language][key];
+    		}
+		});
+
+		document.querySelector('#portsDropdown option').textContent = translations[language].noConnection;
+
+		document.querySelectorAll('div').forEach(div => {
+    		const key = div.getAttribute('data-translation-key');
+    		if (key) {
+    			div.textContent = translations[language][key];
+    		}
+		});
+
+		document.querySelectorAll('label').forEach(label => {
+    		const key = label.getAttribute('data-translation-key');
+    		if (key) {
+    			label.textContent = translations[language][key];
+    		}
+		});
+
+		document.querySelectorAll('span').forEach(span => {
+    		const key = span.getAttribute('data-translation-key');
+    		if (key) {
+    			span.textContent = translations[language][key];
+    		}
+		});
+
+		document.querySelectorAll('option').forEach(option => {
+    		const key = option.getAttribute('data-translation-key');
+    		if (key) {
+    			option.textContent = translations[language][key];
+    		}
+		});
+
+        document.querySelectorAll('input').forEach(input => {
+            const key = input.getAttribute('data-translation-key');
+            if (key && translations[language][`${key}_placeholder`]) {
+                input.setAttribute('placeholder', translations[language][`${key}_placeholder`]);
+            }
+        });        
+	}
+
+	document.addEventListener('DOMContentLoaded', function() {
+		const containers = document.querySelectorAll('.sub-container');
+		containers.forEach(container => {
+			const header = container.querySelector('h2');
+			if (header) {
+    			const content = container.querySelector('.sub-container-content');
+    			header.addEventListener('click', () => {
+    				if (content.style.display === 'block') {
+        				content.style.display = 'none';
+    				} else {
+        				content.style.display = 'block';
+    				}
+    			});
+			}
+		});
+
+		const languageSelector = document.getElementById('language-selector');//获取页面中的语言选择下拉菜单
+		const savedLanguage = localStorage.getItem('preferredLanguage') || 'zh-CN';
+		languageSelector.value = savedLanguage;
+		setLanguage(savedLanguage);
+		currentLanguage = savedLanguage; // 页面第一次载入后，从之前的访问设置中获得语言
+
+		languageSelector.addEventListener('change', function() {
+			const selectedLanguage = languageSelector.value;//当前选定的语言通过以下代码获取
+			setLanguage(selectedLanguage);
+			localStorage.setItem('preferredLanguage', selectedLanguage);
+			currentLanguage = selectedLanguage; // 更新全局变量的值
+			languageSelector.blur();
+		});
+	});
+
+	function showAlert(message, type = 'info') {
+	    const alertBox = document.createElement('div');
+	    alertBox.textContent = message;
+	    
+	    // 设置样式
+	    alertBox.style.position = 'fixed';
+	    alertBox.style.bottom = '20px';
+	    alertBox.style.right = '20px';
+	    alertBox.style.padding = '10px 20px';
+	    alertBox.style.color = '#fff';
+	    alertBox.style.borderRadius = '5px';
+	    alertBox.style.zIndex = '1000';
+	    
+	    // 根据提示类型设置背景颜色
+	    switch(type) {
+	        case 'info':
+	            alertBox.style.backgroundColor = 'rgba(0, 0, 255, 0.7)';  // 蓝色背景
+	            break;
+	        case 'error':
+	            alertBox.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';  // 红色背景
+	            break;
+	        case 'warning':
+	            alertBox.style.backgroundColor = 'rgba(255, 165, 0, 0.7)';  // 橙色背景
+	            break;
+	        default:
+	            alertBox.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';  // 默认黑色背景
+	            break;
+	    }
+
+	    document.body.appendChild(alertBox);
+
+	    // 设置定时器，3秒后移除提示框
+	    setTimeout(() => {
+	        document.body.removeChild(alertBox);
+	    }, 3000);
+	}	
+	</script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+</head>
+<body>
+	<div class="header">
+		<h1>Quileg 助手</h1>
+		<div class="language-selector-container">
+			<i class="fas fa-globe"></i>
+			<select id="language-selector" class="language-selector">
+				<option value="zh-CN">中文</option>
+				<option value="en">English</option>
+			</select>
+			<a href="#" class="help-link">帮助</a>
+		</div>
+	</div>
+	<div id="error-message"></div>
+	<div class="container">
+		<div class="left-column">
+			<div class="sub-container">
+				<div class="container-label QuilegConnection">Quileg 连接</div>
+				<button id="selectQuileg" onclick="selectPort()" data-translation-key="selectQuileg">选择 Quileg</button>
+				<select id="portsDropdown" onchange="handlePortChange()">
+					<option value="">无连接</option>
+				</select>
+				<button onclick="readData()" style="display:none;" data-translation-key="readDeviceData">读取设备数据</button>
+				<button onclick="stopReadingData()" style="display:none;" data-translation-key="stopReadingDeviceData">停止读取设备数据</button>
+				<button onclick="toggleFloatingContainer('floating_dataDisplay')" data-translation-key="dialogueMonitoring">对话监控</button>
+                <div id="statusDisplay"></div>
+			</div>
+			<div class="sub-container">
+				<div class="container-label controlledEquipment">被控设备</div>
+				<div class="sub-container-content">
+					<div class="toolbar-device">
+						<div class="hr-label">
+							<span class="scr_e_display-text">
+								<div><label data-translation-key="mouseReturnCount">鼠标归位次数</label>: <span id="scr_e_Value"></span></div>
+						    	<div><label data-translation-key="devicename">设备名称</label>: <span id="scr_e_deviceName"></span></div>
+						    </span>
+						</div>
+						<div class="toolbar-right" id="toolbar-right">
+							<button onclick="scr_open_tool()" id="scr_e_editIcon" data-translation-key="settings">设置</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="sub-container">
+				<div class="container-label stagingFolder">暂存夹</div>
+				<div class="sub-container-content">
+					<div class="toolbar">
+						<button onclick="pasteFromClipboard()" data-translation-key="pasteFromClipboard" id="pasteFromClipboard">粘贴</button>
+						<button onclick="importfile('temporary')" data-translation-key="importfile" id="temporaryimportfile">导入文件</button>
+						<button onclick="confirmAndClearContainer('temporary')" data-translation-key="clearTemporaryContainer" id="clearTemporaryContainer">清空</button>
+					</div>
+					<div class="dd" id="temporaryDataContainer">
+						<ol class="dd-list"></ol>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="right-column">
+			<div class="container-label workflow">操作流</div>
+			<div class="toolbar">
+				<select id="examples" onchange="examples()">
+					<option value="" data-translation-key="examples">载入范例</option>
+					<option value="0" data-translation-key="appleDevice">苹果设备</option>
+				</select>
+				<button onclick="bulkDatacopyToClipboard(false)" data-translation-key="copyToClipboard" id="copyToClipboard" disabled>拷贝</button>
+				<button onclick="bulkDatacopyToClipboard(true)" data-translation-key="copyAllToClipboard" id="copyAllToClipboard">全拷贝</button>
+                <button onclick="confirmAndClearContainer('bulkData')" data-translation-key="clearbulkDataContainer" id="clearbulkDataContainer">清空</button>
+				<button onclick="saveToFile()" data-translation-key="saveToFile" id="saveToFile">存储</button>
+				<button onclick="importfile('bulkData')" data-translation-key="importfile" id="bulkDataimportfile">导入文件</button>
+                <button onclick="expandButton()" data-translation-key="expandButton" id="expandButton">全展开</button>
+                <button onclick="collapseButton()" data-translation-key="collapseButton" id="collapseButton">全收起</button>
+            </div>
+            <div class="toolbar">
+               	<button onclick="mouse_open_tool()" data-translation-key="mouse">鼠标</button>
+                <button onclick="toggleFloatingContainer('floating_openSoftKeyboard')" data-translation-key="keyboard">键盘</button>
+                <div class="toolbar-right">
+					<button onclick="addLineWithPreset_button(this)" data-preset="FF 00 00 00 00 00 00 00 00 00 01 FE" data-translation-key="operationEmpty">空操作</button>
+				    <button onclick="addLineWithPreset_button(this)" data-preset="FF 01 08 0A 0B 00 00 00 00 00 01 FE" data-translation-key="homeCommand">返回主页</button>
+				    <button onclick="addLineWithPreset_button(this)" data-preset="FF 01 0A 0A 20 00 00 00 00 00 01 FE" data-translation-key="screenshot" id="screenshot">截屏</button>
+               </div>
+            </div>
+            <div class="toolbar-finally">
+                <label for="intervalInput" data-translation-key="interval">间隔：</label>
+                <input type="number" id="intervalInput" value="100" min="100" max="2000" step="10">
+                <label for="intervalInput" data-translation-key="milliseconds">毫秒</label>
+                <div class="toolbar-right">
+					<button class="buttonexecute" onclick="handleExecution()" data-translation-key="execute" id="execute">执行</button>
+					<button class="buttonstop" onclick="stopExecution()" data-translation-key="endOfExecution" id="endOfExecution" disabled>结束</button>
+					<span class="span_line">|</span>
+					<button class="buttonstep" onclick="handleStepExecution()" data-translation-key="stepExecution" id="stepExecution" disabled>单步执行</button>
+					<button class="buttonrepeat" onclick="handleRepeatOrStop()" data-translation-key="repeatExecution" id="repeatExecution" disabled>重复执行</button>
+				</div>
+            </div>
+			<div class="dd" id="bulkDataContainer">
+				<ol class="dd-list"></ol>
+			</div>
+		</div>
+	</div>
+	<div class="floating-container floating-container-dataDisplay" id="floating_dataDisplay">
+		<div class="floating-header">
+			<label class="containerFloating-label conversation" data-translation-key="dialogueMonitoring">对话监控</label>
+			<button onclick="toggleFloatingContainer('floating_dataDisplay')">×</button>
+		</div>
+		<div class="content">
+			<div id="dataDisplay"></div>
+			<div class="overlay"></div>
+		</div>
+	</div>
+    <div class="floating-container floating-container-openSoftKeyboard" id="floating_openSoftKeyboard">
+        <div class="floating-header">
+            <label class="containerFloating-label conversation" data-translation-key="keyboard">键盘</label>
+            <button onclick="toggleFloatingContainer('floating_openSoftKeyboard')">×</button>
+        </div>
+        <div class="keyboard-content">
+            <div class="keyboard">
+                <div class="switch-container">
+                    <div class="system-switch">
+                        <span class="switch-label">Mac</span>
+                        <label class="switch">
+                            <input type="checkbox" id="systemSwitch" onclick="switchSystem()">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="switch-label">Windows</span>
+                    </div>
+                    <div id="keyboard-message" class="keyboard-message"></div>
+                </div>
+                
+                <!-- Row 0 -->
+                <div class="keyboard-row">
+                    <div class="key" data-key="Esc" data-hid="0x29">Esc</div>
+                    <div class="key" data-key="F1" data-hid="0x3a">F1</div>
+                    <div class="key" data-key="F2" data-hid="0x3b">F2</div>
+                    <div class="key" data-key="F3" data-hid="0x3c">F3</div>
+                    <div class="key" data-key="F4" data-hid="0x3d">F4</div>
+                    <div class="key" data-key="F5" data-hid="0x3e">F5</div>
+                    <div class="key" data-key="F6" data-hid="0x3f">F6</div>
+                    <div class="key" data-key="F7" data-hid="0x40">F7</div>
+                    <div class="key" data-key="F8" data-hid="0x41">F8</div>
+                    <div class="key" data-key="F9" data-hid="0x42">F9</div>
+                    <div class="key" data-key="F10" data-hid="0x43">F10</div>
+                    <div class="key" data-key="F11" data-hid="0x44">F11</div>
+                    <div class="key" data-key="F12" data-hid="0x45">F12</div>
+                </div>
+
+                <!-- Row 1 -->
+                <div class="keyboard-row">
+                    <div class="key" data-key="`" data-hid="0x35">`</div>
+                    <div class="key" data-key="1" data-hid="0x1e">1</div>
+                    <div class="key" data-key="2" data-hid="0x1f">2</div>
+                    <div class="key" data-key="3" data-hid="0x20">3</div>
+                    <div class="key" data-key="4" data-hid="0x21">4</div>
+                    <div class="key" data-key="5" data-hid="0x22">5</div>
+                    <div class="key" data-key="6" data-hid="0x23">6</div>
+                    <div class="key" data-key="7" data-hid="0x24">7</div>
+                    <div class="key" data-key="8" data-hid="0x25">8</div>
+                    <div class="key" data-key="9" data-hid="0x26">9</div>
+                    <div class="key" data-key="0" data-hid="0x27">0</div>
+                    <div class="key" data-key="-" data-hid="0x2d">-</div>
+                    <div class="key" data-key="=" data-hid="0x2e">=</div>
+                    <div class="key wide-key" data-key="Backspace" data-hid="0x2a">Backspace</div>
+                    <div class="key" data-key="Home" data-hid="0x4A">HM</div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="keyboard-row">
+                    <div class="key wide-key" data-key="Tab" data-hid="0x2b">Tab</div>
+                    <div class="key" data-key="q" data-hid="0x14">q</div>
+                    <div class="key" data-key="w" data-hid="0x1a">w</div>
+                    <div class="key" data-key="e" data-hid="0x08">e</div>
+                    <div class="key" data-key="r" data-hid="0x15">r</div>
+                    <div class="key" data-key="t" data-hid="0x17">t</div>
+                    <div class="key" data-key="y" data-hid="0x1c">y</div>
+                    <div class="key" data-key="u" data-hid="0x18">u</div>
+                    <div class="key" data-key="i" data-hid="0x0c">i</div>
+                    <div class="key" data-key="o" data-hid="0x12">o</div>
+                    <div class="key" data-key="p" data-hid="0x13">p</div>
+                    <div class="key" data-key="[" data-hid="0x2f">[</div>
+                    <div class="key" data-key="]" data-hid="0x30">]</div>
+                    <div class="key" data-key="\\" data-hid="0x31">\</div>
+                    <div class="key" data-key="PageUp" data-hid="0x4B">PU</div>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="keyboard-row">
+                    <div class="key wide-key" data-key="Caps" data-hid="0x39" onclick="toggleCapsLock()">
+                        <div class="caps-lock-indicator" id="capsLockIndicator"></div>Caps
+                    </div>
+                    <div class="key" data-key="a" data-hid="0x04">a</div>
+                    <div class="key" data-key="s" data-hid="0x16">s</div>
+                    <div class="key" data-key="d" data-hid="0x07">d</div>
+                    <div class="key" data-key="f" data-hid="0x09">f</div>
+                    <div class="key" data-key="g" data-hid="0x0a">g</div>
+                    <div class="key" data-key="h" data-hid="0x0b">h</div>
+                    <div class="key" data-key="j" data-hid="0x0d">j</div>
+                    <div class="key" data-key="k" data-hid="0x0e">k</div>
+                    <div class="key" data-key="l" data-hid="0x0f">l</div>
+                    <div class="key" data-key=";" data-hid="0x33">;</div>
+                    <div class="key" data-key="\'" data-hid="0x34">'</div>
+                    <div class="key wide-key" data-key="Enter" data-hid="0x28">Enter</div>
+                    <div class="key" data-key="PageDown" data-hid="0x4E">PD</div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="keyboard-row">
+                    <div class="key wide-key" data-key="Shift_l" data-hid="0xe1">Shift</div>
+                    <div class="key" data-key="z" data-hid="0x1d">z</div>
+                    <div class="key" data-key="x" data-hid="0x1b">x</div>
+                    <div class="key" data-key="c" data-hid="0x06">c</div>
+                    <div class="key" data-key="v" data-hid="0x19">v</div>
+                    <div class="key" data-key="b" data-hid="0x05">b</div>
+                    <div class="key" data-key="n" data-hid="0x11">n</div>
+                    <div class="key" data-key="m" data-hid="0x10">m</div>
+                    <div class="key" data-key="," data-hid="0x36">,</div>
+                    <div class="key" data-key="." data-hid="0x37">.</div>
+                    <div class="key" data-key="/" data-hid="0x38">/</div>
+                    <div class="key wide-key" data-key="Shift_r" data-hid="0xe5">Shift</div>
+                    <div class="key" data-key="↑" data-hid="0x52">↑</div>
+                    <div class="key" data-key="End" data-hid="0x4D">EN</div>
+                </div>
+
+                <!-- Row 5 -->
+                <div class="keyboard-row">
+                    <div class="key wide-key" data-key="Ctrl_l" data-hid="0xe0">Control</div>
+                    <div class="key wide-key" data-key="Alt_l" data-hid="0xe2">Option</div>
+                    <div class="key wide-key gui-key" data-key="GUI_l" data-hid="0xe3">
+                        <svg class="icon" width="15px" height="15px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M768 85.333333q70.656 0 120.661333 50.005333t50.005333 120.661333-50.005333 120.661333-120.661333 50.005333l-85.333333 0 0 170.666667 85.333333 0q70.656 0 120.661333 50.005333t50.005333 120.661333-50.005333 120.661333-120.661333 50.005333-120.661333-50.005333-50.005333-120.661333l0-85.333333-170.666667 0 0 85.333333q0 70.656-50.005333 120.661333t-120.661333 50.005333-120.661333-50.005333-50.005333-120.661333 50.005333-120.661333 120.661333-50.005333l85.333333 0 0-170.666667-85.333333 0q-70.656 0-120.661333-50.005333t-50.005333-120.661333 50.005333-120.661333 120.661333-50.005333 120.661333 50.005333 50.005333 120.661333l0 85.333333 170.666667 0 0-85.333333q0-70.656 50.005333-120.661333t120.661333-50.005333zM341.333333 768l0-85.333333-85.333333 0q-35.328 0-60.330667 25.002667t-25.002667 60.330667 25.002667 60.330667 60.330667 25.002667 60.330667-25.002667 25.002667-60.330667zM256 170.666667q-35.328 0-60.330667 25.002667t-25.002667 60.330667 25.002667 60.330667 60.330667 25.002667l85.333333 0 0-85.333333q0-35.328-25.002667-60.330667t-60.330667-25.002667zM597.333333 597.333333l0-170.666667-170.666667 0 0 170.666667 170.666667 0zM768 682.666667l-85.333333 0 0 85.333333q0 35.328 25.002667 60.330667t60.330667 25.002667 60.330667-25.002667 25.002667-60.330667-25.002667-60.330667-60.330667-25.002667zM768 170.666667q-35.328 0-60.330667 25.002667t-25.002667 60.330667l0 85.333333 85.333333 0q35.328 0 60.330667-25.002667t25.002667-60.330667-25.002667-60.330667-60.330667-25.002667z" fill="#444444"/></svg>
+                    </div>
+                    <div class="key extra-wide-key" data-key="Space" data-hid="0x2c">Space</div>
+                    <div class="key wide-key gui-key" data-key="GUI_r" data-hid="0xe7">
+                        <svg class="icon" width="15px" height="15px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M768 85.333333q70.656 0 120.661333 50.005333t50.005333 120.661333-50.005333 120.661333-120.661333 50.005333l-85.333333 0 0 170.666667 85.333333 0q70.656 0 120.661333 50.005333t50.005333 120.661333-50.005333 120.661333-120.661333 50.005333-120.661333-50.005333-50.005333-120.661333l0-85.333333-170.666667 0 0 85.333333q0 70.656-50.005333 120.661333t-120.661333 50.005333-120.661333-50.005333-50.005333-120.661333 50.005333-120.661333 120.661333-50.005333l85.333333 0 0-170.666667-85.333333 0q-70.656 0-120.661333-50.005333t-50.005333-120.661333 50.005333-120.661333 120.661333-50.005333 120.661333 50.005333 50.005333 120.661333l0 85.333333 170.666667 0 0-85.333333q0-70.656 50.005333-120.661333t120.661333-50.005333zM341.333333 768l0-85.333333-85.333333 0q-35.328 0-60.330667 25.002667t-25.002667 60.330667 25.002667 60.330667 60.330667 25.002667 60.330667-25.002667 25.002667-60.330667zM256 170.666667q-35.328 0-60.330667 25.002667t-25.002667 60.330667 25.002667 60.330667 60.330667 25.002667l85.333333 0 0-85.333333q0-35.328-25.002667-60.330667t-60.330667-25.002667zM597.333333 597.333333l0-170.666667-170.666667 0 0 170.666667 170.666667 0zM768 682.666667l-85.333333 0 0 85.333333q0 35.328 25.002667 60.330667t60.330667 25.002667 60.330667-25.002667 25.002667-60.330667-25.002667-60.330667-60.330667-25.002667zM768 170.666667q-35.328 0-60.330667 25.002667t-25.002667 60.330667l0 85.333333 85.333333 0q35.328 0 60.330667-25.002667t25.002667-60.330667-25.002667-60.330667-60.330667-25.002667z" fill="#444444"/></svg>
+                    </div>
+                    <div class="key wide-key" data-key="Alt_r" data-hid="0xe6">Option</div>
+                    <div class="key wide-key" data-key="Ctrl_r" data-hid="0xe4">Control</div>
+                    <div class="key" data-key="←" data-hid="0x50">←</div>
+                    <div class="key" data-key="↓" data-hid="0x51">↓</div>
+                    <div class="key" data-key="→" data-hid="0x4f">→</div>
+                </div>
+            </div>
+            <div class="keyboard-right">
+                <div class="formatKeysshow-margin">
+                    <div class="formatKeysshow" id="formatKeysshow"></div>
+                </div>
+                <hr>
+                <div>
+                    <input class="keyboard_titleInput" placeholder="标题" data-translation-key="title" type="text" id="keyboard_titleInput">
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="mode" id="hold_mode" value="hold"> <label for="hold_mode" data-translation-key="pahutnpa">长按至下一流程到来</label>
+                    </label>
+                    <br>
+                    <label>
+                        <input type="radio" name="mode" id="timed_mode" value="timed" checked> <input type="number" id="pulldownkeytimeInput" min="100" max="5000" step="100" value="100"> <label for="pulldownkeytimeInput" data-translation-key="laterandrelease"> 毫秒后弹起</label>
+                    </label>
+                </div>
+                <div>
+                    <input type="checkbox" id="keyboard_executeCheckbox"> <label for="keyboard_executeCheckbox" data-translation-key="execute">执行</label>
+                </div>
+                <div>
+                    <button class="addtoWorkflow" onclick="send_keyboard_Serial_RxPacket()" data-translation-key="addtoWorkflow" id="addtoWorkflow">添加到操作流</button>
+                </div>
+            </div>
+        </div>
+    </div>
+	<div id="scr_overlay">
+	    <div id="scr_tool">
+	    	<div>
+	            <label class="measureTheNumberOfMouseReturns" data-translation-key="measureTheNumberOfMouseReturns">测算鼠标归位次数</label>
+	            <button id="scr_close-tool">×</button>
+	        </div>
+	        <div class="scr_column-container">
+	            <div class="scr_column">
+	                <h2><label data-translation-key="step">步骤</label>1</h2>
+	                <div class="" data-translation-key="scr_step1_text"></div>
+		            <br><img src="assets/cQm4HEh7jr.jpg" width="50%">
+		            <br><br><br>
+					<div class="button-div" id="scr_reset-btn_0">
+					    <i class="fa-solid fa-arrow-left" style="transform: rotate(-45deg);"></i>
+					    <span data-translation-key="multiclick">多次点击</span>
+					    <span data-translation-key="lowerLeftCornerHoming">直到鼠标移到屏幕最左下角</span>
+					</div>
+
+	            </div>
+	            <div class="scr_column">
+	                <h2><label data-translation-key="step">步骤</label>2</h2>
+	                <div data-translation-key="scr_step2_text"></div>
+		            <br><img src="assets/8t5QskXeRJ.jpg" width="50%">
+		            <br><br><br>
+					<div class="button-div" id="scr_reset-btn_xy">
+					    <i class="fa-solid fa-arrow-right" style="transform: rotate(-45deg);"></i>
+					    <span data-translation-key="multiclick">多次点击</span>
+					    <span data-translation-key="upperRightCornerMovement">直到鼠标移到屏幕最右上角</span>
+					</div>
+	            </div>
+	            <div class="scr_column">
+	                <h2><label data-translation-key="results">结果</label></h2>
+	                <div data-translation-key="scr_step3_text"></div>
+	                <br><img src="assets/iDeapfcwzF.jpg" width="50%">
+	                <br><br><br><br>
+	                <p>
+						<label data-translation-key="mouseReturnCount">鼠标归位次数</label>: <span id="scr_Pos">0</span>
+					</p>
+					<p>
+		            	<label data-translation-key="devicename">设备名称</label>: <input type="text" id="scr_e_deviceInput">
+		            </p>
+	                <button id="scr_e_saveButton" class="scr_e_save-button" onclick="scr_e_saveValues()" data-translation-key="save">保存</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+    <div id="mouse_overlay">
+        <div id="mouse_tool">
+            <div>
+                <label class="mouse" data-translation-key="mouse">鼠标</label>
+                <button id="mouse_close-tool">×</button>
+            </div>
+            <div class="mouse_column-container">
+                <div class="mouse_column">
+                    <h2><label data-translation-key="homing">归位</label></h2>
+                    <br><img src="assets/X7fECf75Qr.jpg" width="50%">
+                    <br><br><div class="" data-translation-key="homing_text"></div>
+                    <br><br>
+					<div class="mouse_homing" onclick="mouse_homing(this)" data-direction=1 id="mouse_homing"><i class="fa-solid fa-arrow-left" style="transform: rotate(45deg);"></i></div>
+					<div class="mouse_homing" onclick="mouse_homing(this)" data-direction=2 id="mouse_homing"><i class="fa-solid fa-arrow-left" style="transform: rotate(135deg);"></i></div>
+					<br>
+					<div class="mouse_homing" onclick="mouse_homing(this)" data-direction=0 id="mouse_homing"><i class="fa-solid fa-arrow-left" style="transform: rotate(-45deg);"></i></div>
+					<div class="mouse_homing" onclick="mouse_homing(this)" data-direction=3 id="mouse_homing"><i class="fa-solid fa-arrow-left" style="transform: rotate(225deg);"></i></div>
+	                <div class="display_none" id="show_mouse_addtoWorkflowCheckbox">
+	                    <input type="checkbox" id="mouse_addtoWorkflowCheckbox" disabled> <label for="mouse_addtoWorkflowCheckbox" data-translation-key="addTheHomingOperationToTheWorkflow">在流程中添加归位操作</label>
+	                </div>
+                </div>
+
+                <div class="mouse_column">
+                    <h2><label data-translation-key="moveToTargetArea">移动到目标区域</label></h2>
+                    <!-- <br><img src="assets/3CCfDcF5CF.jpg" width="50%"> -->
+					<div class="button-fake">
+					    <img src="assets/h22aabjTPW.png" width="50%">
+					</div>
+                    <div data-translation-key="moveToTargetArea_text"></div>
+                    <div class="mouse_controls">
+                        X = <span id="mouse_xPos">0</span>,
+                        Y = <span id="mouse_yPos">0</span>
+                    </div>					
+	                <div class="mouse_combined display_none" id="show_mouse_xAndyAreCombinedAndMovedAtTheSameTime">
+	                    <input type="checkbox" id="mouse_xAndyAreCombinedAndMovedAtTheSameTime"> <label for="mouse_xAndyAreCombinedAndMovedAtTheSameTime" data-translation-key="xAndyAreCombinedAndMovedAtTheSameTime">x、y合并后同时移动（精度差不推荐）</label>
+	                </div>
+                	<div class="mouse_combined" id="show_mouse_holdDownTheButtonWhileMoving">
+                		<input type="checkbox" id="mouse_holdDownTheButtonWhileMoving" onclick="check_holdDownTheButtonWhileMoving()"> <label for="mouse_holdDownTheButtonWhileMoving" data-translation-key="holdDownTheButtonWhileMoving">移动时按住鼠标按键</label>
+                		<div class="mouse_combined_checkbox display_none" id="show_mouse_combined_checkbox">
+	                        <input type="checkbox" name="mode" id="mouse_move_button_left" value="1"> <label for="mouse_move_button_left" data-translation-key="mouseLeftbutton">鼠标左键</label>
+	                        <br>
+	                        <input type="checkbox" name="mode" id="mouse_move_button_right" value="1"> <label for="mouse_move_button_right" data-translation-key="mouseRightButton">鼠标右键</label>
+	                        <br>
+	                        <input type="checkbox" name="mode" id="mouse_move_button_middle" value="1"> <label for="mouse_move_button_middle" data-translation-key="mouseMiddleButton">鼠标中键</label>
+		                </div>
+                	</div>
+                	<div class="display_none" id="mouse_calibration">
+                		<button onclick="calibration()" id="calibration" data-translation-key="calibration">校验</button>
+                	</div>
+                </div>
+                <div class="mouse_column">
+                	<h2><label data-translation-key="wheel">滚轮</label></h2>
+                	<div data-translation-key="moveToTheTargetAndPressTheMouseButtonAtTheSameTime">移到目标后，同时按下鼠标键</div>
+                	<div class="mouse_complete_wheel" id="show_mouse_complete_wheel">
+						<div class="mouse_controls">
+						    wheel = <span id="mouse_wheel">0</span>
+						</div>
+						<button onclick="wheelUpandDown('up')" id="wheel_up" data-translation-key="wheelUp">滚轮向上</button>
+						<button onclick="wheelUpandDown('down')" id="wheel_down" data-translation-key="wheelDown">滚轮向下</button>
+                	</div>
+                    <h2><label data-translation-key="button">按键</label></h2>
+                    <div data-translation-key="moveToTheTargetAndPressTheMouseButtonAtTheSameTime">移到目标后，同时按下鼠标键</div>
+            		<div class="mouse_complete_checkbox" id="show_mouse_complete_checkbox">
+                        <input type="checkbox" name="mode" id="mouse_move_complete_button_left" value="1"> <label for="mouse_move_complete_button_left" data-translation-key="mouseLeftbutton">鼠标左键</label>
+                        <br>
+                        <input type="checkbox" name="mode" id="mouse_move_complete_button_right" value="1"> <label for="mouse_move_complete_button_right" data-translation-key="mouseRightButton">鼠标右键</label>
+                        <br>
+                        <input type="checkbox" name="mode" id="mouse_move_complete_button_middle" value="1"> <label for="mouse_move_complete_button_middle" data-translation-key="mouseMiddleButton">鼠标中键</label>
+	                </div>
+                </div>            
+            </div>
+            <div class="toolbar-finally">
+            	<label data-translation-key="Use">使用</label> <input class="mouse_column_input" type="text" id="mouse_titleInput" data-translation-key="title" placeholder="标题"> <label data-translation-key="toEncapsulateProcessesIntoASingleUnit">将流程封装成一组单元</label>
+                <div class="toolbar-right">
+		            <button id="mouse_addtoWorkflow" class="addtoWorkflow" onclick="send_mouse_Serial_RxPacket()" data-translation-key="addtoWorkflow">添加到操作流</button>
+		        </div>
+			</div>
+        </div>
+    </div>	
+	<div class="footer">
+		&copy; 2024-2025 Quileg · MIT License
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
+	<script>
+		//串口相关代码
+		function checkSerialSupport() {
+            return "serial" in navigator;
+		}
+
+		const filters = [{ usbVendorId: 6790 }];
+
+		async function requestPort() {
+    		return await navigator.serial.requestPort({ filters });
+		}
+
+		async function openPort(port, baudRate = 9600) {
+    		await port.open({ baudRate });
+		}
+
+		async function closePort(port) {
+    		await port.close();
+		}
+
+		let reader;
+		let reading = false;
+		async function readPortData(port, handleData) {
+    		reader = port.readable.getReader();
+    		reading = true;
+    		try {
+    			while (reading) {
+    			const { value, done } = await reader.read();
+    			if (done) {
+    				reader.releaseLock();
+    				break;
+    			}
+    			handleData(value);
+    			}
+    		} catch (error) {
+    			console.error(error);
+    		} finally {
+    			reader.releaseLock();
+    		}
+		}
+
+		async function readData() { //读取设备数据
+    		if (connectedPort) {
+    			try {
+        			await readPortData(connectedPort, (value) => {
+        				const hexString = uint8ArrayToHexString(value);
+        				let colorClass = 'received-data';
+        				if (lastSentData && lastSentData === hexString) {
+        				colorClass = 'received-data same-data';
+        				} else {
+        				colorClass = 'received-data different-data';
+        				}
+        				dataDisplay.innerHTML += `<div class="${colorClass}">${hexString}</div>`;
+        				dataDisplay.scrollTop = dataDisplay.scrollHeight;
+        			});
+    			} catch (error) {
+        			statusDisplay.innerHTML += '<div class="statusDisplay-error-data">' + translations[currentLanguage].failedToReadDeviceData + error.message + '</div>';//读取设备数据失败:
+        			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+        			console.error(error);
+    			}
+    		} else {
+    			statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>';//未选择设备
+    			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+    		}
+		}
+
+		function stopReadingData() { //停止读取设备数据
+    		reading = false;
+    		if (reader) {
+    			reader.cancel();
+    		}
+    		statusDisplay.innerHTML += '<div class="statusDisplay-default-data">' + translations[currentLanguage].stopReadingDeviceData + '</div>';//停止读取设备数据
+    		statusDisplay.scrollTop = statusDisplay.scrollHeight;
+		}
+
+		async function writePortData(port, data) { //往端口写数据
+    		const writer = port.writable.getWriter();
+    		await writer.write(data);
+    		writer.releaseLock();
+		}
+
+		function hexStringToUint8Array(hexString) {
+    		hexString = hexString.replace(/\s+/g, '');
+    		if (hexString.length % 2 !== 0) {
+    			throw new Error(translations[currentLanguage].hexStringMustHaveAnEvenLength);//十六进制字符串的长度必须为偶数
+    		}
+    		const arrayBuffer = new Uint8Array(hexString.length / 2);
+    		for (let i = 0; i < hexString.length; i += 2) {
+    			arrayBuffer[i / 2] = parseInt(hexString.substr(i, 2), 16);
+    		}
+    		return arrayBuffer;
+		}
+
+		function uint8ArrayToHexString(uint8Array) {
+    		return Array.from(uint8Array)
+			.map(byte => byte.toString(16).padStart(2, "0").toUpperCase())
+			.join(" ");
+		}
+
+		let ports = [];
+		let connectedPort = null;
+		let dataDisplay = document.getElementById('dataDisplay');
+		let portsDropdown = document.getElementById('portsDropdown');
+		let statusDisplay = document.getElementById('statusDisplay');
+		let lastSentData = null;
+
+		async function selectPort() {
+    		try {
+    			const port = await requestPort();
+    			if (port) {
+    			const { usbVendorId, usbProductId } = port.getInfo();
+    			const portIdentifier = `USB ${usbVendorId} - ${usbProductId || 'N/A'}`;
+
+    			for (let i = 0; i < portsDropdown.options.length; i++) {
+        			if (portsDropdown.options[i].text === portIdentifier) {
+        				portsDropdown.value = portsDropdown.options[i].value;
+        				await handlePortChange();
+        				return;
+    				}
+    			}
+
+    			ports.push(port);
+    			const option = document.createElement("option");
+    			option.value = ports.length - 1;
+    			option.text = portIdentifier;
+    			portsDropdown.add(option);
+    			portsDropdown.value = option.value;
+    			await handlePortChange();
+    			}
+    		} catch (error) {
+    			statusDisplay.innerHTML += '<div class="statusDisplay-error-data">' + translations[currentLanguage].failedToselectQuileg + error.message + '</div>';//选择设备失败
+    			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+    			console.error(error);
+    		}
+		}
+
+		async function handlePortChange() {
+    		const selectedIndex = portsDropdown.value;
+    		if (connectedPort) {
+    			await stopReadingData();
+    			await closeSelectedPort();
+    		}
+    		if (selectedIndex !== "") {
+    			try {
+        			connectedPort = ports[selectedIndex];
+        			await openSelectedPort();
+        			readData();
+    			} catch (error) {
+        			portsDropdown.value = "";
+        			statusDisplay.innerHTML += '<div class="statusDisplay-error-data">' + translations[currentLanguage].failedToOpenDevice + error.message + '</div>';//打开设备失败:
+        			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+        			console.error(error);
+    			}
+    		}
+		}
+
+		async function openSelectedPort() {
+    		const selectedIndex = portsDropdown.value;
+    		if (selectedIndex !== "") {
+    			const port = ports[selectedIndex];
+    			try {
+        			await openPort(port);
+        			const { usbVendorId, usbProductId } = port.getInfo();
+        			statusDisplay.innerHTML += `<div class="statusDisplay-default-data">` + translations[currentLanguage].deviceOpened + `${usbVendorId} - ${usbProductId || 'N/A'}</div>`;//已打开设备：USB
+        			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+    			} catch (error) {
+        			statusDisplay.innerHTML += `<div class="statusDisplay-error-data">` + translations[currentLanguage].failedToOpenDevice + error.message + `</div>`;//打开设备失败:
+        			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+        			console.error(error);
+        			portsDropdown.value = "";
+    			}
+    		} else {
+    			statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>';//未选择设备
+    			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+    		}
+		}
+
+		async function closeSelectedPort() {
+    		if (connectedPort) {
+    			try {
+        			await closePort(connectedPort);
+        			statusDisplay.innerHTML += '<div class="statusDisplay-default-data">' + translations[currentLanguage].deviceClosed + '</div>';//已关闭设备
+        			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+        			connectedPort = null;
+    			} catch (error) {
+        			statusDisplay.innerHTML += `<div class="statusDisplay-error-data">` + translations[currentLanguage].failedToCloseDevice + error.message + `</div>`;//关闭设备失败:
+        			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+        			console.error(error);
+    			}
+    		}
+		}
+
+		async function sendFixedHexData(fixedHexData) { //数据透传
+    		const data = hexStringToUint8Array(fixedHexData);
+    		const interval = parseInt(document.getElementById('intervalInput').value);
+    		if (!connectedPort && portsDropdown.options.length > 1) {
+    			portsDropdown.selectedIndex = 1;
+    			await handlePortChange();
+    		} else if (!connectedPort) {
+    			await selectPort();
+    		}
+    		if (connectedPort) {
+    			try {
+					for (var i = 0; i < data[10]; i++) {//重复次数
+	    				await writePortData(connectedPort, data);//往端口写数据
+	    				await new Promise(resolve => setTimeout(resolve, interval));//延时
+	    			}
+        			lastSentData = fixedHexData.toUpperCase();
+        			dataDisplay.innerHTML += `<div class="dataDisplay-sent-data">${fixedHexData.toUpperCase()}</div>`;
+        			dataDisplay.scrollTop = dataDisplay.scrollHeight;
+    			} catch (error) {
+        			statusDisplay.innerHTML += '<div class="statusDisplay-error-data">' + translations[currentLanguage].failedToSendFixedData + error.message + `</div>`;//发送固定数据失败:
+        			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+        			console.error(error);
+    			}
+    		} else {
+    			statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>';//未选择设备
+    			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+    		}
+		}
+	</script>
+	<script>
+        //流程
+        let selectedItem = null;//当前流程
+
+		function handleDdItemClick(event, element) {//切换当前流程
+		    event.stopPropagation();//阻止冒泡事件
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+		    if ($(element).closest('#bulkDataContainer').length > 0) {
+		        $('.dd-item').not(element).removeClass('selected');
+		        // 移除所有 .dd-item 下第一个 .data-line 的 color 样式
+		        $('.dd-item .data-line:first-child').css('color', '');
+		        $(element).toggleClass('selected');
+		        selectedItem = $(element).hasClass('selected') ? $(element) : null;
+		        // 修改新选中元素下第一个 .data-line 的字体颜色为白色
+		        if (selectedItem) {//检查 selectedItem 是否为 null
+		            selectedItem.find('.data-line').first().css('color', '#ffffff');
+		            document.getElementById('stepExecution').disabled = false; // 启用单步执行按钮
+		            document.getElementById('copyToClipboard').disabled = false; // 启用拷贝按钮
+		            document.getElementById('repeatExecution').disabled = false; // 启用重复执行按钮
+		        } else {
+		            document.getElementById('stepExecution').disabled = true; // 禁用单步执行按钮
+		            document.getElementById('copyToClipboard').disabled = true; // 启用拷贝按钮
+		            document.getElementById('repeatExecution').disabled = true; // 禁用重复执行按钮
+		        }
+		    }
+		}
+
+        function addLineWithPreset_button(button) { //按键准备添加新的流程
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }        	
+            const presetValue = button.getAttribute('data-preset');
+            const titleValue = translations[currentLanguage][button.getAttribute('data-translation-key')];
+            addLineWithPreset(presetValue,titleValue,true,false);
+        }
+
+        function examples() { //添加一组范例
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+        	console.log(document.getElementById('examples').value);
+            switch (document.getElementById('examples').value) {
+                case "0":
+					if (currentLanguage == 'zh-CN'){
+		        		text = `
+FF 00 00 00 00 00 00 00 00 00 01 FE // 以下是一组针对苹果设备的操作流范例，点击右上角的“执行”按钮尝试连接设备并运行
+FF 01 08 0A 0B 00 00 00 00 00 01 FE // Command + h 返回主页
+FF 00 00 00 00 00 00 00 00 00 01 FE // 可将一组操作放在嵌套内方便阅读
+	FF 02 00 0A 00 00 00 00 00 00 05 FE // 鼠标右移
+	FF 02 00 F6 00 00 00 00 00 00 05 FE // 鼠标左移
+	FF 02 00 00 F6 00 00 00 00 00 05 FE // 鼠标上移
+	FF 02 00 00 0A 00 00 00 00 00 05 FE // 鼠标下移
+FF 01 0A 0A 20 00 00 00 00 00 01 FE // Command + Shift + 3 截屏
+`
+						TextAddToContainer(text,'bulkData');
+			        	text = `FF 00 00 00 00 00 00 00 00 00 00 FE // 可以将右侧的操作流拖放到这里暂存`
+						TextAddToContainer(text,'temporary');
+						$('#bulkDataContainer > .dd-list > .dd-item').first().click();//使第一个被点击，设置
+					}else{
+		        		text = `
+FF 00 00 00 00 00 00 00 00 00 01 FE // Here is a sample workflow for Apple devices. Click the "Execute" button in the top right corner to attempt to connect to the device and run the workflow.
+FF 01 08 0A 0B 00 00 00 00 00 01 FE // Command + h Return to the homepage.
+FF 00 00 00 00 00 00 00 00 00 01 FE // You can place a set of actions within a nested structure for easier readability.
+	FF 02 00 0A 00 00 00 00 00 00 05 FE // Mouse right to move
+	FF 02 00 F6 00 00 00 00 00 00 05 FE // Mouse left to move
+	FF 02 00 00 F6 00 00 00 00 00 05 FE // Mouse up to move
+	FF 02 00 00 0A 00 00 00 00 00 05 FE // Mouse down to move
+FF 01 0A 0A 20 00 00 00 00 00 01 FE // Command + Shift + 3 Take a screenshot.
+`
+						TextAddToContainer(text,'bulkData');
+			        	text = `FF 00 00 00 00 00 00 00 00 00 01 FE // You can drag and drop the workflow from the right side to temporarily store it here.`
+						TextAddToContainer(text,'temporary');
+						$('#bulkDataContainer > .dd-list > .dd-item').first().click();//使第一个被点击，设置
+					}
+		        break;
+                default:
+                    break;
+            }
+            document.getElementById('examples').value = "";
+        }
+
+        // function addLineWithPreset(presetValue,titleValue,backgroundcolortransition) { //添加新的流程
+        // 	// const presetValue = button.getAttribute('data-preset');
+        // 	// const titleValue = button.getAttribute('data-title');
+        // 	$('#bulkDataContainer .dd-empty').remove();
+		// 	const hexArray = presetValue.split(" ");//按空格分割字符串
+		// 	if (hexArray[1] == "01") {
+		// 		icon = '<i class="fa-solid fa-keyboard"></i>';
+		// 	} else if (hexArray[1] == "02") {
+		// 		icon = '<i class="fa-solid fa-computer-mouse"></i>';
+		// 	} else {
+		// 		icon = '<i class="fa-solid fa-bars"></i>';
+		// 	}
+		// 	repeats_text = parseInt(hexArray[10], 16);
+		// 	// if ((repeats_text == 0)||(repeats_text == 1)) {
+		// 	// 	repeats_text = "";//只显示多次重复的次数
+		// 	// }else{
+		// 		repeats_text = "x " + repeats_text;
+		// 	// }
+        // 	const newLine = `
+        // 		<li onclick="handleDdItemClick(event, this)" class="dd-item" data-id="${Date.now()}" title="${presetValue}">
+        // 			<div class="data-line">
+        // 				<div class="dd-handle drag-handle">${icon}</div>
+        // 				<div class="data-label">${titleValue} <label onclick="editItem(this)" data-translation-key="edit"><i class="fa-solid fa-pen-to-square"></i></label></div>
+        // 				<input type="text" class="bulkDataInput hidden" value="${presetValue}">
+        // 				<input type="text" class="titleInput hidden" value="${titleValue}" onblur="saveItem(this)" onclick="event.stopPropagation()">
+        // 				<label class="repeats-label" onclick="editRepeats(this)">${repeats_text}</label>
+        // 				<input type="number" class="repeats-input hidden" min="0" onblur="saveRepeats(this)" onclick="event.stopPropagation()">
+        // 				<div class="dd-trash" onclick="removeLine(this)"><i class="fa-solid fa-trash-can"></i></div>
+        // 			</div>
+        // 		</li>
+        // 	`;
+        // 	const newLine_backgroundcolortransition = `
+        // 		<li onclick="handleDdItemClick(event, this)" class="dd-item" data-id="${Date.now()}" style="background-color: lightblue; transition: background-color 2s;" title="${presetValue}">
+        // 			<div class="data-line">
+        // 				<div class="dd-handle drag-handle">${icon}</div>
+        // 				<div class="data-label">${titleValue} <label onclick="editItem(this)" data-translation-key="edit"><i class="fa-solid fa-pen-to-square"></i></label></div>
+        // 				<input type="text" class="bulkDataInput hidden" value="${presetValue}">
+        // 				<input type="text" class="titleInput hidden" value="${titleValue}" onblur="saveItem(this)" onclick="event.stopPropagation()">
+        // 				<label class="repeats-label" onclick="editRepeats(this)">${repeats_text}</label>
+        // 				<input type="number" class="repeats-input hidden" min="0" onblur="saveRepeats(this)" onclick="event.stopPropagation()">
+        // 				<div class="dd-trash" onclick="removeLine(this)"><i class="fa-solid fa-trash-can"></i></div>
+        // 			</div>
+        // 		</li>
+        // 	`;
+        // 	if (backgroundcolortransition) {//背景颜色过渡
+	    //     	// 检查当前 selectedItem 是否仍存在于 DOM 中
+	    //     	if (selectedItem && selectedItem.length && $.contains(document, selectedItem[0]) && selectedItem.closest('#bulkDataContainer').length > 0) {
+	    //     		newItem = $(newLine_backgroundcolortransition).insertAfter(selectedItem);
+	    //     	} else {
+	    //     		selectedItem = null; // 清除不存在的 selectedItem
+	    //     		newItem = $(newLine_backgroundcolortransition).appendTo('#bulkDataContainer > .dd-list');
+	    //     	}
+        //     	// 设置底色逐渐变淡
+        //     	setTimeout(() => {
+        //     		newItem.css('background-color', '');
+        //     	}, 10); // 立即开始变淡，过渡时间为2秒
+
+		//         // 监听背景色过渡结束事件，并移除过渡效果
+		//         newItem.on('transitionend', function() {
+		//             $(this).css('transition', 'none');
+		//         });  
+		// 	}else{//背景颜色不过渡
+	    //     	// 检查当前 selectedItem 是否仍存在于 DOM 中
+	    //     	if (selectedItem && selectedItem.length && $.contains(document, selectedItem[0]) && selectedItem.closest('#bulkDataContainer').length > 0) {
+	    //     		newItem = $(newLine).insertAfter(selectedItem);
+	    //     	} else {
+	    //     		selectedItem = null; // 清除不存在的 selectedItem
+	    //     		newItem = $(newLine).appendTo('#bulkDataContainer > .dd-list');
+	    //     	}				
+		// 	}
+        // 	// 更新 nestable 组件
+        // 	$('#bulkDataContainer').nestable('serialize');
+
+        // 	// 移除所有项的选中状态，并选中新添加的项
+        // 	$('.dd-item').removeClass('selected');
+		// 	// 移除所有 .dd-item 下第一个 .data-line 的 color 样式
+		// 	$('.dd-item .data-line:first-child').css('color', '');
+        // 	newItem.addClass('selected');
+        // 	selectedItem = newItem;
+		// 	// 修改新选中元素下第一个 .data-line 的字体颜色为白色
+    	// 	selectedItem.find('.data-line').first().css('color', '#ffffff');
+        // 	updateButtondisabled();//更新按钮可用状态
+        // }
+
+
+        function addLineWithPreset(presetValue, titleValue, backgroundcolortransition, nestMode = false) { //添加新的流程
+            // const presetValue = button.getAttribute('data-preset');
+            // const titleValue = button.getAttribute('data-title');
+            $('#bulkDataContainer .dd-empty').remove();
+            const hexArray = presetValue.split(" ");//按空格分割字符串
+            if (hexArray[1] == "01") {
+                icon = '<i class="fa-solid fa-keyboard"></i>';
+            } else if (hexArray[1] == "02") {
+                icon = '<i class="fa-solid fa-computer-mouse"></i>';
+            } else {
+                icon = '<i class="fa-solid fa-bars"></i>';
+            }
+            repeats_text = parseInt(hexArray[10], 16);
+            // if ((repeats_text == 0)||(repeats_text == 1)) {
+            //  repeats_text = "";//只显示多次重复的次数
+            // }else{
+                repeats_text = "x " + repeats_text;
+            // }
+            const newLine = `
+                <li onclick="handleDdItemClick(event, this)" class="dd-item" data-id="${Date.now()}" title="${presetValue}">
+                    <div class="data-line">
+                        <div class="dd-handle drag-handle">${icon}</div>
+                        <div class="data-label">${titleValue} <label onclick="editItem(this)" data-translation-key="edit"><i class="fa-solid fa-pen-to-square"></i></label></div>
+                        <input type="text" class="bulkDataInput hidden" value="${presetValue}">
+                        <input type="text" class="titleInput hidden" value="${titleValue}" onblur="saveItem(this)" onclick="event.stopPropagation()">
+                        <label class="repeats-label" onclick="editRepeats(this)">${repeats_text}</label>
+                        <input type="number" class="repeats-input hidden" min="0" onblur="saveRepeats(this)" onclick="event.stopPropagation()">
+                        <div class="dd-trash" onclick="removeLine(this)"><i class="fa-solid fa-trash-can"></i></div>
+                    </div>
+                </li>
+            `;
+            const newLine_backgroundcolortransition = `
+                <li onclick="handleDdItemClick(event, this)" class="dd-item" data-id="${Date.now()}" style="background-color: lightblue; transition: background-color 2s;" title="${presetValue}">
+                    <div class="data-line">
+                        <div class="dd-handle drag-handle">${icon}</div>
+                        <div class="data-label">${titleValue} <label onclick="editItem(this)" data-translation-key="edit"><i class="fa-solid fa-pen-to-square"></i></label></div>
+                        <input type="text" class="bulkDataInput hidden" value="${presetValue}">
+                        <input type="text" class="titleInput hidden" value="${titleValue}" onblur="saveItem(this)" onclick="event.stopPropagation()">
+                        <label class="repeats-label" onclick="editRepeats(this)">${repeats_text}</label>
+                        <input type="number" class="repeats-input hidden" min="0" onblur="saveRepeats(this)" onclick="event.stopPropagation()">
+                        <div class="dd-trash" onclick="removeLine(this)"><i class="fa-solid fa-trash-can"></i></div>
+                    </div>
+                </li>
+            `;
+            if (backgroundcolortransition) {//背景颜色过渡
+                if (nestMode && selectedItem && selectedItem.length && $.contains(document, selectedItem[0])) {
+		            // 检查 .dd-list 是否存在，如果不存在则创建一个
+		            let ddList = selectedItem.children('.dd-list').first();
+		            if (ddList.length === 0) {
+		                ddList = $('<ol class="dd-list"></ol>').appendTo(selectedItem);
+		            }
+                    // 将新流程添加到 selectedItem 内的 .dd-list 里最后一个
+                    newItem = $(newLine_backgroundcolortransition).appendTo(selectedItem.children('.dd-list').first());
+                    console.log(newItem);
+                } else if (selectedItem && selectedItem.length && $.contains(document, selectedItem[0]) && selectedItem.closest('#bulkDataContainer').length > 0) {
+                    newItem = $(newLine_backgroundcolortransition).insertAfter(selectedItem);
+                } else {
+                    selectedItem = null; // 清除不存在的 selectedItem
+                    newItem = $(newLine_backgroundcolortransition).appendTo('#bulkDataContainer > .dd-list');
+                }
+
+                // 设置底色逐渐变淡
+                setTimeout(() => {
+                    newItem.css('background-color', '');
+                }, 10); // 立即开始变淡，过渡时间为2秒
+
+                // 监听背景色过渡结束事件，并移除过渡效果
+                newItem.on('transitionend', function() {
+                    $(this).css('transition', 'none');
+                });  
+            } else {//背景颜色不过渡
+                if (nestMode && selectedItem && selectedItem.length && $.contains(document, selectedItem[0])) {
+		            // 检查 .dd-list 是否存在，如果不存在则创建一个
+		            let ddList = selectedItem.children('.dd-list').first();
+		            if (ddList.length === 0) {
+		                ddList = $('<ol class="dd-list"></ol>').appendTo(selectedItem);
+		            }
+                    // 将新流程添加到 selectedItem 内的 .dd-list 里最后一个
+                    newItem = $(newLine).appendTo(selectedItem.children('.dd-list').first());
+                    console.log(newItem);
+                } else if (selectedItem && selectedItem.length && $.contains(document, selectedItem[0]) && selectedItem.closest('#bulkDataContainer').length > 0) {
+                    newItem = $(newLine).insertAfter(selectedItem);
+                } else {
+                    selectedItem = null; // 清除不存在的 selectedItem
+                    newItem = $(newLine).appendTo('#bulkDataContainer > .dd-list');
+                }               
+            }
+
+            // 更新 nestable 组件
+            $('#bulkDataContainer').nestable('serialize');
+
+            if (!nestMode) {
+                // 移除所有项的选中状态，并选中新添加的项
+                $('.dd-item').removeClass('selected');
+                // 移除所有 .dd-item 下第一个 .data-line 的 color 样式
+                $('.dd-item .data-line:first-child').css('color', '');
+                newItem.addClass('selected');
+                selectedItem = newItem;
+                // 修改新选中元素下第一个 .data-line 的字体颜色为白色
+                selectedItem.find('.data-line').first().css('color', '#ffffff');
+            }
+            
+            updateButtondisabled(); // 更新按钮可用状态
+        }
+
+
+        function handleNestableChange(event) { //用来处理 Nestable 发生状态变化时的逻辑
+        	if (selectedItem && selectedItem.closest('#temporaryDataContainer').length > 0) {
+        		selectedItem.removeClass('selected');
+        		selectedItem.find('.data-line').first().css('color', '');
+        		selectedItem = null;
+        		const lastItem = $('#bulkDataContainer .dd-list .dd-item').last();
+        		if (lastItem.length > 0) {
+        			lastItem.addClass('selected');
+        			selectedItem = lastItem;
+        			// 修改新选中元素下第一个 .data-line 的字体颜色为白色
+            		selectedItem.find('.data-line').first().css('color', '#ffffff');
+        		}
+        	}
+        	// 如果没有项了，恢复 .dd-empty
+        	if ($('#bulkDataContainer .dd-item').length === 0) {
+        		if ($('#bulkDataContainer .dd-list').length === 0) {
+        			$('#bulkDataContainer').append('<ol class="dd-list"></ol>');
+        		}
+        		if ($('#bulkDataContainer .dd-empty').length === 0) {
+        			$('#bulkDataContainer').append('<div class="dd-empty"></div>');
+        		}
+        	}
+        	if ($('#temporaryDataContainer .dd-item').length === 0) {
+        		if ($('#temporaryDataContainer .dd-list').length === 0) {
+        			$('#temporaryDataContainer').append('<ol class="dd-list"></ol>');
+        		}
+        		if ($('#temporaryDataContainer .dd-empty').length === 0) {
+        			$('#temporaryDataContainer').append('<div class="dd-empty"></div>');
+        		}
+        	}
+        	updateButtondisabled();//更新按钮可用状态
+        }
+
+        function removeLine(button) {//删除单个流程
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }        	
+        	const itemToRemove = $(button).closest('.dd-item');
+        	itemToRemove.remove();
+
+        	// 如果没有项了，恢复 .dd-empty
+        	if ($('#bulkDataContainer .dd-item').length === 0) {
+        		if ($('#bulkDataContainer .dd-list').length === 0) {
+        			$('#bulkDataContainer').append('<ol class="dd-list"></ol>');
+        		}
+        		if ($('#bulkDataContainer .dd-empty').length === 0) {
+        			$('#bulkDataContainer').append('<div class="dd-empty"></div>');
+        		}
+        	}
+        	if ($('#temporaryDataContainer .dd-item').length === 0) {
+        		if ($('#temporaryDataContainer .dd-list').length === 0) {
+        			$('#temporaryDataContainer').append('<ol class="dd-list"></ol>');
+        		}
+        		if ($('#temporaryDataContainer .dd-empty').length === 0) {
+        			$('#temporaryDataContainer').append('<div class="dd-empty"></div>');
+        		}
+        	}
+        	updateButtondisabled();//更新按钮可用状态
+        }
+
+        function clearContainer(objective) { //清空
+        	if (objective=='bulkData') {
+			    if (isRunning) {
+			    	if (currentLanguage == 'zh-CN') {
+			    		showAlert('任务正在执行，无法完成此操作', 'error');
+			    	}else{
+			    		showAlert('The task is running and this operation cannot be completed', 'error');
+			    	}
+			    	return
+			    }        		
+        		$('#bulkDataContainer .dd-list').children().remove();
+        		if ($('#bulkDataContainer .dd-item').length === 0) {
+        			if ($('#bulkDataContainer .dd-list').length === 0) {
+        				$('#bulkDataContainer').append('<ol class="dd-list"></ol>');
+        			}
+        			if ($('#bulkDataContainer .dd-empty').length === 0) {
+        				$('#bulkDataContainer').append('<div class="dd-empty"></div>');
+        			}
+        		}
+        	}else{
+        		$('#temporaryDataContainer .dd-list').children().remove();
+        		if ($('#temporaryDataContainer .dd-item').length === 0) {
+        			if ($('#temporaryDataContainer .dd-list').length === 0) {
+        				$('#temporaryDataContainer').append('<ol class="dd-list"></ol>');
+        			}
+        			if ($('#temporaryDataContainer .dd-empty').length === 0) {
+        				$('#temporaryDataContainer').append('<div class="dd-empty"></div>');
+        			}
+        		}
+        	}
+        	updateButtondisabled();//更新按钮可用状态
+        }
+
+        function confirmAndClearContainer(objective) {
+        	if (currentLanguage == 'zh-CN'){
+	        	if (confirm("确认要清空流程吗？")) {
+	        		clearContainer(objective);
+	        	}
+	        }else{
+	        	if (confirm("Confirmed to clear the process?")) {
+	        		clearContainer(objective);
+	        	}	        	
+	        }
+        }
+
+        function countItems(objective) {//流程统计
+            if (objective=='bulkData') {
+                return $('#bulkDataContainer .dd-list .dd-item').length;
+            }else{
+                return $('#temporaryDataContainer .dd-list .dd-item').length;
+        	}
+        }
+
+        function updateButtondisabled() { //更新按钮可用状态
+        	const bulkDataitemCount = countItems('bulkData');
+        	if (bulkDataitemCount === 0) { //空
+            	$('#execute').prop('disabled', true);//执行
+            	$('#stepExecution').prop('disabled', true);//单步执行
+            	$('#repeatExecution').prop('disabled', true);//重复执行
+            	$('#copyToClipboard').prop('disabled', true);//拷贝
+            	$('#copyAllToClipboard').prop('disabled', true);//全拷贝
+            	$('#saveToFile').prop('disabled', true);//存储
+            	$('#clearbulkDataContainer').prop('disabled', true);//清空
+            	$('#expandButton').prop('disabled', true);//展开所有
+            	$('#collapseButton').prop('disabled', true);//收起所有
+            	$('#bulkDataimportfile').prop('disabled', false);//导入文件
+            	$('#examples').prop('disabled', false);//范例
+
+        	} else { //非空
+            	$('#execute').prop('disabled', false);//执行
+            	$('#stepExecution').prop('disabled', false);//单步执行
+            	$('#repeatExecution').prop('disabled', false);//重复执行
+            	$('#copyToClipboard').prop('disabled', false);//拷贝
+            	$('#copyAllToClipboard').prop('disabled', false);//全拷贝
+            	$('#saveToFile').prop('disabled', false);//存储
+            	$('#clearbulkDataContainer').prop('disabled', false);//清空
+            	$('#expandButton').prop('disabled', false);//展开所有
+            	$('#collapseButton').prop('disabled', false);//收起所有
+            	$('#bulkDataimportfile').prop('disabled', true);//导入文件
+            	$('#examples').prop('disabled', true);//范例
+        	}
+        	const temporaryitemCount = countItems('temporary');
+        	if (temporaryitemCount === 0) { //空
+            	$('#clearTemporaryContainer').prop('disabled', true);//清空
+            	$('#temporaryimportfile').prop('disabled', false);//导入文件
+        	} else { //非空
+            	$('#clearTemporaryContainer').prop('disabled', false);//清空
+            	$('#temporaryimportfile').prop('disabled', true);//导入文件
+        	}
+            if (pressedHids.length == 0) {
+                $('#addtoWorkflow').prop('disabled', true);//键盘添加到操作流
+            }else{
+                $('#addtoWorkflow').prop('disabled', false);//键盘添加到操作流
+            }
+        }
+
+        $(document).ready(function() {
+        	// 初始化 Nestable
+        	$('#bulkDataContainer').nestable({
+        		handleClass: 'drag-handle',
+        		callback: handleNestableChange
+        	});
+        	$('#temporaryDataContainer').nestable({
+        		handleClass: 'drag-handle',
+        		callback: handleNestableChange
+        	});
+
+        	// 动态阻止冒泡
+        	$('#bulkDataContainer').on('click', '.dd-collapse, .dd-expand', function(event) {
+        		event.stopPropagation();	// 阻止事件冒泡
+        	});
+
+        	// 确保 handleDdItemClick 处理逻辑正确调整
+        	$('#bulkDataContainer').on('click', '.dd-item', function(event) {
+        		handleDdItemClick(event, this);	// 确保这里正确处理了点击逻辑
+        	});
+
+        	// 可能还需要处理嵌套列表项的点击
+        	$('#bulkDataContainer').on('click', 'li.dd-item', function(event) {
+        		event.stopPropagation(); // 阻止嵌套的 dd-item 触发多次
+        	});
+
+        	examples();//自动添加一组范例
+        	updateButtondisabled();//更新按钮可用状态
+        });
+	</script>
+	<script>
+    	//流程内容编辑
+		function editItem(element) {
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+		    // 获取父级元素
+		    const parent = element.closest('.data-line');
+		    // 隐藏 .data-label
+		    parent.querySelector('.data-label').style.display = 'none';
+		    // 显示 .titleInput
+		    parent.querySelector('.titleInput').classList.remove('hidden');
+		    // 自动聚焦到输入框
+		    parent.querySelector('.titleInput').focus();
+		}
+
+		function saveItem(input) {
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+		    // 获取父级元素
+		    const parent = input.closest('.data-line');
+		    // 获取新的标题值
+		    const newTitle = input.value;
+		    // 更新 .data-label 的内容
+		    const dataLabel = parent.querySelector('.data-label');
+		    dataLabel.innerHTML = newTitle + ' <label onclick="editItem(this)" data-translation-key="edit"><i class="fa-solid fa-pen-to-square"></i></label>';
+		    // 隐藏 .titleInput
+		    input.classList.add('hidden');
+		    // 显示 .data-label
+		    dataLabel.style.display = 'block';
+		}
+
+		function editRepeats(label) {//修改重复次数
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+		    const repeatsInput = label.nextElementSibling;
+		    const currentRepeats = parseInt(label.innerText.replace('x ', ''));
+		    
+		    // 隐藏label并显示输入框
+		    label.style.display = 'none';
+		    repeatsInput.value = currentRepeats;
+		    repeatsInput.classList.remove('hidden');
+		    repeatsInput.focus();
+		}
+
+		function saveRepeats(input) {//修改重复次数保存
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+		    const repeatsLabel = input.previousElementSibling;
+		    const bulkDataInput = input.closest('.data-line').querySelector('.bulkDataInput');
+		    const liElement = input.closest('li');
+		    const newRepeats = parseInt(input.value);
+
+		    if (!isNaN(newRepeats) && newRepeats >= 0 && newRepeats <= maximum_repetition) {
+		        // 更新repeats-label的值
+		        repeatsLabel.innerText = 'x ' + newRepeats;
+		        
+		        // 更新bulkDataInput中倒数第二个字节
+		        let bulkData = bulkDataInput.value.split(' ');
+		        let repeatsHex = newRepeats.toString(16).padStart(2, '0').toUpperCase();
+		        bulkData[bulkData.length - 2] = repeatsHex;
+		        const updatedBulkData = bulkData.join(' ');
+
+		        // 更新bulkDataInput的值
+		        bulkDataInput.value = updatedBulkData;
+		        
+		        // 更新li的title属性
+		        liElement.title = updatedBulkData;		        
+
+		        // 隐藏输入框并显示label
+		        input.classList.add('hidden');
+		        repeatsLabel.style.display = '';
+		    } else {
+		    	if (currentLanguage == 'zh-CN'){
+		    		showAlert('有效重复次数为: 0 - ' + maximum_repetition, 'error');
+		    	}else{
+		    		showAlert('Valid number of repetitions: 0 - ' + maximum_repetition, 'error');
+		    	}
+		        // 如果输入无效，直接恢复显示label
+		        input.value = repeatsLabel.innerText.replace('x ', '');
+		        input.classList.add('hidden');
+		        repeatsLabel.style.display = '';
+		    }
+		}
+	</script>
+	<script>
+		//执行、运行
+		let isPaused = false;
+		let isStopped = false;
+		let isRunning = false; // 标识是否正在执行
+
+		async function handleExecution() { //执行
+		    if (!connectedPort && portsDropdown.options.length > 1) {
+		        portsDropdown.selectedIndex = 1;
+		        await handlePortChange();
+		    } else if (!connectedPort) {
+		        await selectPort();
+		    }
+		    if (connectedPort) {
+			    if (isRunning) {
+			        // 当前正在运行，点击后暂停
+			        togglePause();
+			    } else {
+			        // 当前未运行，点击后开始执行
+			        isRunning = true;
+			        isStopped = false;
+			        isPaused = false;
+			        document.getElementById('selectQuileg').disabled = true;//选择端口
+			        document.getElementById('portsDropdown').disabled = true;//切换端口
+			        document.getElementById('intervalInput').disabled = true;//执行间隔
+			        document.getElementById('execute').innerText = translations[currentLanguage].pause; // “暂停”
+			        document.getElementById('endOfExecution').disabled = false; // 启用“结束”按钮
+			        document.getElementById('stepExecution').disabled = true;//单步执行
+			        document.getElementById('repeatExecution').disabled = true;//重复执行
+			        await sendBulkData();
+			        // 执行完毕或被停止后重置按钮状态
+			        document.getElementById('execute').innerText = translations[currentLanguage].execute;// '执行'
+			        document.getElementById('endOfExecution').disabled = true; // 禁用“结束”按钮
+			        document.getElementById('stepExecution').disabled = false;//单步执行
+			        document.getElementById('repeatExecution').disabled = false;//重复执行
+			        isRunning = false;
+			        document.getElementById('selectQuileg').disabled = false;//选择端口
+			        document.getElementById('portsDropdown').disabled = false;//切换端口
+			        document.getElementById('intervalInput').disabled = false;//执行间隔
+			    }
+		    } else {
+		        statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>'; // 未选择设备
+		        statusDisplay.scrollTop = statusDisplay.scrollHeight;
+		    }
+		}
+
+		async function sendBulkData() { //执行
+		    if (!connectedPort && portsDropdown.options.length > 1) {
+		        portsDropdown.selectedIndex = 1;
+		        await handlePortChange();
+		    } else if (!connectedPort) {
+		        await selectPort();
+		    }
+		    if (connectedPort) {
+		        const bulkDataItems = $('#bulkDataContainer .dd-item');
+		        const interval = parseInt(document.getElementById('intervalInput').value);
+		        for (const item of bulkDataItems) {
+		            let hexString = $(item).find('.bulkDataInput').val().trim();
+		            hexString = hexString.split('//')[0].trim();
+		            if (hexString === '') continue;
+		            try {
+		                $(item).addClass('executing');
+		                const data = hexStringToUint8Array(hexString);
+		                for (var i = 0; i < data[10]; i++) {
+		                    if (isStopped) break; // 如果停止，则退出循环
+		                    while (isPaused) {
+		                        await new Promise(resolve => setTimeout(resolve, interval)); // 等待暂停解除
+		                    }
+		                    await writePortData(connectedPort, data); // 往端口写数据
+		                    lastSentData = hexString.toUpperCase(); // 用于比对回传，送显示
+		                    dataDisplay.innerHTML += `<div class="dataDisplay-sent-data">${hexString.toUpperCase()}</div>`;
+		                    dataDisplay.scrollTop = dataDisplay.scrollHeight;
+		                    await new Promise(resolve => setTimeout(resolve, interval)); // 延时
+		                }
+		                if (isStopped) break; // 如果停止，则退出循环
+		                await new Promise(resolve => setTimeout(resolve, interval)); // 延时
+		            } catch (error) {
+		                statusDisplay.innerHTML += '<div class="statusDisplay-error-data">' + translations[currentLanguage].failedToSendData + error.message + '</div>'; // 发送数据失败:
+		                statusDisplay.scrollTop = statusDisplay.scrollHeight;
+		                console.error(error);
+		            } finally {
+		                $(item).removeClass('executing');
+		            }
+		        }
+		    } else {
+		        statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>'; // 未选择设备
+		        statusDisplay.scrollTop = statusDisplay.scrollHeight;
+		    }
+		}
+
+		async function togglePause() { //执行-暂停
+		    if (!connectedPort && portsDropdown.options.length > 1) {
+		        portsDropdown.selectedIndex = 1;
+		        await handlePortChange();
+		    } else if (!connectedPort) {
+		        await selectPort();
+		    }
+		    if (connectedPort) {
+			    isPaused = !isPaused;
+			    document.getElementById('execute').innerText = isPaused ? translations[currentLanguage].continue : translations[currentLanguage].pause; // '继续' '暂停'
+		    } else {
+		        statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>'; // 未选择设备
+		        statusDisplay.scrollTop = statusDisplay.scrollHeight;
+		    }
+		}
+
+		async function stopExecution() { //结束
+		    if (!connectedPort && portsDropdown.options.length > 1) {
+		        portsDropdown.selectedIndex = 1;
+		        await handlePortChange();
+		    } else if (!connectedPort) {
+		        await selectPort();
+		    }
+		    if (connectedPort) {
+			    isStopped = true;
+			    isPaused = false; // 如果停止，则取消暂停
+			    document.getElementById('execute').innerText = translations[currentLanguage].execute; // 重置按钮文本为“执行”
+			    isRunning = false; // 停止执行
+		        document.getElementById('selectQuileg').disabled = false;//选择端口
+		        document.getElementById('portsDropdown').disabled = false;//切换端口
+				document.getElementById('intervalInput').disabled = false;//执行间隔
+		    } else {
+		        statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>'; // 未选择设备
+		        statusDisplay.scrollTop = statusDisplay.scrollHeight;
+		    }
+		}
+
+		async function handleStepExecution() {//单步执行按钮
+			if (selectedItem) {
+			    if (!connectedPort && portsDropdown.options.length > 1) {
+			        portsDropdown.selectedIndex = 1;
+			        await handlePortChange();
+			    } else if (!connectedPort) {
+			        await selectPort();
+			    }
+			    if (connectedPort) {
+			        // 禁用单步执行按钮，防止重复点击
+			        document.getElementById('execute').disabled = true;//执行
+			        document.getElementById('endOfExecution').disabled = true;//结束
+			        document.getElementById('stepExecution').disabled = true;//单步执行
+			        document.getElementById('repeatExecution').disabled = true;//重复执行
+			        const interval = parseInt(document.getElementById('intervalInput').value);
+			        
+			        // 获取所有任务（忽略嵌套关系，按顺序查找 bulkDataContainer 中的所有 data-line）
+			        const allItems = $('#bulkDataContainer').find('.dd-item');
+			        let currentIndex = allItems.index(selectedItem);
+			        
+			        if (currentIndex === -1) return; // 如果未找到 selectedItem，则返回
+
+			        while (currentIndex < allItems.length) {
+			            let currentItem = $(allItems[currentIndex]);
+			            let hexString = currentItem.find('.bulkDataInput').val().trim();
+			            hexString = hexString.split('//')[0].trim();
+			            
+			            if (hexString !== '') {
+			                try {
+						        isRunning = true;
+						        isStopped = false;
+						        isPaused = false;			                	
+						        document.getElementById('selectQuileg').disabled = true;//选择端口
+						        document.getElementById('portsDropdown').disabled = true;//切换端口
+						        document.getElementById('intervalInput').disabled = true;//执行间隔
+			                    currentItem.addClass('executing');
+			                    const data = hexStringToUint8Array(hexString);
+			                    for (var i = 0; i < data[10]; i++) {
+			                        await writePortData(connectedPort, data); // 往端口写数据
+			                        lastSentData = hexString.toUpperCase(); // 用于比对回传，送显示
+			                        dataDisplay.innerHTML += `<div class="dataDisplay-sent-data">${hexString.toUpperCase()}</div>`;
+			                        dataDisplay.scrollTop = dataDisplay.scrollHeight;
+			                        await new Promise(resolve => setTimeout(resolve, interval)); // 延时
+			                    }
+			                    // 任务完成后，弹出提示
+			                    const dataLabel = currentItem.find('.data-label').first().text().trim();
+			                    if (currentLanguage == 'zh-CN'){
+				                    showAlert(`任务完成: ${dataLabel}`, 'info');	
+				                }else{
+				                	showAlert(`Mission accomplished: ${dataLabel}`, 'info');	
+				                }
+				                isRunning = false;
+						        document.getElementById('selectQuileg').disabled = false;//选择端口
+						        document.getElementById('portsDropdown').disabled = false;//切换端口
+						        document.getElementById('intervalInput').disabled = false;//执行间隔
+			                } catch (error) {
+			                    statusDisplay.innerHTML += '<div class="statusDisplay-error-data">' + translations[currentLanguage].failedToSendData + error.message + '</div>'; // 发送数据失败:
+			                    statusDisplay.scrollTop = statusDisplay.scrollHeight;
+			                    console.error(error);
+			                } finally {
+			                    currentItem.removeClass('executing');
+			                }
+			            }
+
+			            // 移动到下一个任务
+			            currentIndex++;
+			            if (currentIndex < allItems.length) {
+			                selectedItem.removeClass('selected');
+					        // 移除所有 .dd-item 下第一个 .data-line 的 color 样式
+					        $('.dd-item .data-line:first-child').css('color', '');
+			                selectedItem = $(allItems[currentIndex]);
+			                selectedItem.addClass('selected');
+			                selectedItem.find('.data-line').first().css('color', '#ffffff');
+			                break; // 等待用户点击下一次 "单步执行"
+			            }
+			        }
+			        // 任务完成后重新启用单步执行按钮
+			        document.getElementById('execute').disabled = false;//执行
+			        document.getElementById('stepExecution').disabled = false;//单步执行
+			        document.getElementById('repeatExecution').disabled = false;//重复执行
+			    } else {
+			        statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>'; // 未选择设备
+			        statusDisplay.scrollTop = statusDisplay.scrollHeight;
+			    }
+			}else{
+		    	// 创建提示框
+				if (currentLanguage == 'zh-CN'){
+		    		showAlert('请选择一个任务以进行单步执行', 'warning');
+				}else{
+		    		showAlert('Please select a task for single-step execution.', 'warning');
+				}
+			}
+		}
+
+		// handleRepeatOrStop 处理重复执行或停止当前执行
+		function handleRepeatOrStop() { //重复执行
+		    const button = document.getElementById('repeatExecution');
+		    if (button.innerText === translations[currentLanguage].repeatExecution) { //重复执行
+		        // 开始执行
+		        startRepeatExecution();
+		    } else {
+		        // 停止执行
+		        stopRepeatExecution();
+		    }
+		}
+
+		// startRepeatExecution 开始重复执行选定的任务及其子任务
+		async function startRepeatExecution() { //重复执行
+		    if (selectedItem) {
+			    if (!connectedPort && portsDropdown.options.length > 1) {
+			        portsDropdown.selectedIndex = 1;
+			        await handlePortChange();
+			    } else if (!connectedPort) {
+			        await selectPort();
+			    }
+			    if (connectedPort) {
+			        document.getElementById('execute').disabled = true;//执行
+			        document.getElementById('endOfExecution').disabled = true;//结束
+			        document.getElementById('stepExecution').disabled = true;//单步执行
+			        isStopped = false; // 重置停止标志
+			        isRunning = true; // 设置运行状态为真
+			        document.getElementById('selectQuileg').disabled = true;//选择端口
+			        document.getElementById('portsDropdown').disabled = true;//切换端口
+					document.getElementById('intervalInput').disabled = true;//执行间隔
+			        const button = document.getElementById('repeatExecution');
+			        button.innerText = translations[currentLanguage].stop; // 更新按钮文本为“停止”
+
+			        const itemsToExecute = selectedItem.find('.dd-item').addBack();
+
+			        while (!isStopped && isRunning) {
+			            for (const item of itemsToExecute) {
+			                await executeItem($(item));
+			                if (isStopped) break; // 如果停止，则退出循环
+			            }
+			        }
+
+			        // 任务完成或停止后，重置按钮和状态
+			        button.innerText = translations[currentLanguage].repeatExecution;
+			        isRunning = false;
+			        isStopped = false; // 重置停止标志
+			        document.getElementById('selectQuileg').disabled = false;//选择端口
+			        document.getElementById('portsDropdown').disabled = false;//切换端口
+			        document.getElementById('intervalInput').disabled = false;//执行间隔
+			        document.getElementById('execute').disabled = false;//执行
+			        document.getElementById('stepExecution').disabled = false;//单步执行
+			    } else {
+			        statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>'; // 未选择设备
+			        statusDisplay.scrollTop = statusDisplay.scrollHeight;
+			    }
+		    } else {
+		    	// 创建提示框
+				if (currentLanguage == 'zh-CN'){
+		    		showAlert('请选择一个任务以进行重复执行', 'warning');
+				}else{
+		    		showAlert('Please select a task to repeat.', 'warning');
+				}
+		    }
+		}
+
+		// stopRepeatExecution 停止正在进行的任务执行
+		function stopRepeatExecution() { //停止重复执行
+		    isStopped = true; // 设置停止标志为真
+		    document.getElementById('repeatExecution').innerText = translations[currentLanguage].repeatExecution; // 更新按钮文本为“重复执行”
+		}
+
+		// executeItem 保持原样，执行单个任务
+		async function executeItem(item) { //重复执行
+		    if (!item || isStopped) return;
+		    const hexString = item.find('.bulkDataInput').val().trim();
+		    if (hexString === '') return;
+
+		    item.addClass('executing');
+		    const data = hexStringToUint8Array(hexString);
+		    const interval = parseInt(document.getElementById('intervalInput').value);
+
+		    for (let i = 0; i < data[10]; i++) {
+		        if (isStopped) break;
+		        await writePortData(connectedPort, data);
+		        lastSentData = hexString.toUpperCase();
+		        dataDisplay.innerHTML += `<div class="dataDisplay-sent-data">${hexString.toUpperCase()}</div>`;
+		        dataDisplay.scrollTop = dataDisplay.scrollHeight;
+		        await new Promise(resolve => setTimeout(resolve, interval));
+		    }
+		    item.removeClass('executing');
+		    await new Promise(resolve => setTimeout(resolve, interval));
+		}
+	</script>
+	<script>
+		//流程
+        function bulkDatacopyToClipboard(copyAll = true) { //流程拷贝到剪贴板
+        	const text = bulkDataGenerateText(copyAll);
+        	const tempTextarea = document.createElement('textarea');
+        	tempTextarea.value = text;
+        	document.body.appendChild(tempTextarea);
+        	tempTextarea.select();
+        	document.execCommand('copy');
+        	document.body.removeChild(tempTextarea);
+
+        	// 创建提示框
+			if (currentLanguage == 'zh-CN'){
+	        	if (text==""){
+	        		showAlert('请先选择要拷贝的内容', 'warning');
+	        	}else{
+	        		if (copyAll){
+	        			showAlert('所有流程已拷贝到剪贴板', 'info');
+	        		}else{
+	        			showAlert('已拷贝到剪贴板', 'info');
+	        		}
+	        	}
+			}else{
+	        	if (text==""){
+	        		showAlert('Please select the content you want to copy first.', 'warning');
+	        	}else{
+	        		if (copyAll){
+	        			showAlert('All processes have been copied to the clipboard.', 'info');
+	        		}else{
+	        			showAlert('Copied to the clipboard.', 'info');
+	        		}
+	        	}
+			}
+        }
+
+        function pasteFromClipboard() { //从剪贴板粘贴
+        	navigator.clipboard.readText()
+        	.then(text => {
+        		this_return = TextAddToContainer(text,'temporary');
+        		if (this_return == "ok") {
+	        		// 创建提示框
+					if (currentLanguage == 'zh-CN'){
+			        	showAlert('已成功从剪贴板粘贴内容', 'info');
+					}else{
+			        	showAlert('Content successfully pasted from the clipboard.', 'info');
+					}
+				}else{
+		        	showAlert(this_return, 'error');
+				}
+        	})
+        	.catch(err => {
+        		console.error('Error reading clipboard contents:', err);//读取剪贴板内容时出错
+        	});
+        }
+
+		function isValidHexPacket(packet) { //校验数据格式
+		    // 定义正则表达式
+		    const regex = /^FF(?:\s?[0-9A-Fa-f]{2}){10}\s?FE$/;
+		    
+		    // 使用正则表达式测试输入字符串
+		    return regex.test(packet);
+		}
+
+        function TextAddToContainer(text,objective) { //添加流程
+        	this_return = "ok";
+        	const lines = text.split('\n'); // 按行拆分输入的文本
+        	// let currentParent = $('#bulkDataContainer > .dd-list'); // 确定目标容器为 bulkDataContainer 的顶层列表
+            let currentParent = $('#bulkDataContainer > .dd-list').first(); // 确定目标容器为 bulkDataContainer 的第一个顶层列表
+        	if (objective == 'temporary') {
+                // currentParent = $('#temporaryDataContainer > .dd-list'); // 确定目标容器为 temporaryDataContainer 的顶层列表
+                currentParent = $('#temporaryDataContainer > .dd-list').first(); // 确定目标容器为 temporaryDataContainer 的第一个顶层列表
+        	}
+        	let previousDepth = 0; // 初始化前一个深度
+        	let parentStack = [currentParent]; // 初始化父容器栈
+        	let currentItem = null; // 初始化当前项
+
+        	function createNewItem(bulkData, title) {
+
+			const hexArray = bulkData.split(" ");//按空格分割字符串
+			if (hexArray[1] == "01") {
+				icon = '<i class="fa-solid fa-keyboard"></i>';
+			} else if (hexArray[1] == "02") {
+				icon = '<i class="fa-solid fa-computer-mouse"></i>';
+			} else {
+				icon = '<i class="fa-solid fa-bars"></i>';
+			}
+			repeats_text = parseInt(hexArray[10], 16);
+			// if ((repeats_text == 0)||(repeats_text == 1)) {
+			// 	repeats_text = "";//只显示多次重复的次数
+			// }else{
+				repeats_text = "x " + repeats_text;
+			// }
+        	return `
+        		<li onclick="handleDdItemClick(event, this)" class="dd-item" data-id="${Date.now()}" style="background-color: lightblue; transition: background-color 2s;" title="${bulkData}">
+	        		<div class="data-line">
+	        			<div class="dd-handle drag-handle">${icon}</div>
+	        			<div class="data-label">${title} <label onclick="editItem(this)" data-translation-key="edit" onclick="event.stopPropagation()"><i class="fa-solid fa-pen-to-square"></i></label></div>
+	        			<input type="text" class="bulkDataInput hidden" value="${bulkData}">
+	        			<input type="text" class="titleInput hidden" value="${title}" onblur="saveItem(this)" onclick="event.stopPropagation()">
+	        			<label class="repeats-label" onclick="editRepeats(this)">${repeats_text}</label>
+	        			<input type="number" class="repeats-input hidden" min="0" onblur="saveRepeats(this)" onclick="event.stopPropagation()">
+	        			<div class="dd-trash" onclick="removeLine(this)"><i class="fa-solid fa-trash-can"></i></div>
+	        		</div>
+	        		<ol class="dd-list"></ol>
+        		</li>
+        	`;
+        	}
+
+        	lines.forEach(line => {
+            	const match = line.match(/^(\t*)([^\t]+?)(?:\s*\/\/\s*(.*))?$/); // 使用正则表达式匹配每一行的内容
+            	if (!match) return; // 如果匹配失败，跳过该行
+            	// console.log(match[2]);
+				if (match) {
+					if (isValidHexPacket(match[2])) {//校验数据格式
+		            	const depth = match[1].length; // 根据制表符数量确定深度
+		            	const bulkData = match[2]; // 获取数据部分并去除两端空格
+		            	const title = match[3] ? match[3].trim() : ''; // 获取标题部分并去除两端空格
+
+		            	const newItem = $(createNewItem(bulkData, title)); // 创建新的列表项
+
+		            	if (depth > previousDepth) {
+		            		parentStack.push(currentParent); // 将当前父容器压栈
+		            		currentParent = currentItem.children('ol.dd-list').last(); // 设置新的父容器为当前项的子列表
+		            	} else if (depth < previousDepth) {
+		            		for (let i = 0; i < previousDepth - depth; i++) {
+		                		currentParent = parentStack.pop(); // 根据深度差弹出父容器
+		            		}
+		            	}
+
+		            	currentParent.append(newItem); // 将新的列表项添加到当前父容器末尾
+		            	currentItem = newItem; // 更新当前项
+		            	previousDepth = depth; // 更新前一个深度
+
+		            	// 设置底色逐渐变淡
+		            	setTimeout(() => {
+		            		newItem.css('background-color', '');
+		            	}, 10); // 立即开始变淡，过渡时间为2秒
+
+				        // 监听背景色过渡结束事件，并移除过渡效果
+				        newItem.on('transitionend', function() {
+				            $(this).css('transition', 'none');
+				        });  
+				    }else{
+				    	if (currentLanguage == 'zh-CN'){
+				    		this_return = "数据格式不正确。";
+				    	}else{
+				    		this_return = "The data format is incorrect.";
+				    	}
+				    	console.log("The data format is incorrect." + match[2]);//数据格式不正确。
+				    }
+			    }else{
+			    	if (currentLanguage == 'zh-CN'){
+				    	this_return = "未找到匹配项。";
+				    }else{
+				    	this_return = "No match found.";
+				    }
+			    	console.log("No match found.");//未找到匹配项。
+			    }
+        	});
+
+        	// 清空临时变量
+        	currentParent = null;
+        	previousDepth = 0;
+        	parentStack = [];
+        	currentItem = null;
+
+        	if (objective=='bulkData') {
+                $('#bulkDataContainer').nestable('serialize'); // 序列化 nestable 组件
+                $('#bulkDataContainer .dd-empty').remove();
+        	}else{
+                $('#temporaryDataContainer').nestable('serialize'); // 序列化 nestable 组件
+                $('#temporaryDataContainer .dd-empty').remove();
+        	}
+        	updateButtondisabled(); //更新按钮可用状态
+        	return this_return;
+        }
+
+        //$('#temporaryDataContainer .dd-empty').remove();
+        //updateButtondisabled(); //更新按钮可用状态
+
+        function importfile(objective) { //导入文件
+        	// 创建一个隐藏的文件输入元素
+        	const fileInput = document.createElement('input');
+        	fileInput.type = 'file';
+        	fileInput.accept = '.quileg';
+        	fileInput.style.display = 'none';
+
+        	// 文件选择后读取内容
+        	fileInput.addEventListener('change', function(event) {
+        		const file = event.target.files[0];
+        		if (file) {
+        			const reader = new FileReader();
+        			reader.onload = function(e) {
+        				const content = e.target.result;
+        				// document.getElementById('fileContent').textContent = content;
+        				clearContainer(objective); //清空现有流程
+        				TextAddToContainer(content,objective);//目标流程板
+        				$('#bulkDataContainer > .dd-list > .dd-item').first().click();//使第一个被点击，设置
+        				// 创建提示框
+						if (currentLanguage == 'zh-CN'){
+				        	showAlert('文件' + file.name + '已成功导入', 'info');
+						}else{
+				        	showAlert('The file ' + file.name + ' has been successfully imported.', 'info');
+						}
+        			};
+        			reader.readAsText(file);
+        		}
+        	});
+
+        	// 触发文件选择
+        	fileInput.click();
+        }
+
+		function getCurrentDateTime() { //返回当前时间的字符串，格式为 YYYYMMDD_HHMMSS
+		    const now = new Date();
+
+		    const year = now.getFullYear();
+		    const month = String(now.getMonth() + 1).padStart(2, '0');
+		    const day = String(now.getDate()).padStart(2, '0');
+		    const hours = String(now.getHours()).padStart(2, '0');
+		    const minutes = String(now.getMinutes()).padStart(2, '0');
+		    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+		    return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+		}
+
+		function getFormattedDate(language) { //根据传入的语言参数（“en” 或 “zh”）输出相应格式的日期。
+		    const date = new Date();
+		    const optionsEn = { year: 'numeric', month: 'long', day: 'numeric' };
+		    const optionsZh = { year: 'numeric', month: 'numeric', day: 'numeric' };
+
+		    if (language === 'en') {
+		        return date.toLocaleDateString('en-US', optionsEn);
+		    } else if (language === 'zh') {
+		        return date.toLocaleDateString('zh-CN', optionsZh).replace(/\//g, '年').replace('年', '年').replace('月', '月').replace('日', '日');
+		    } else {
+		        throw new Error('Unsupported language. Please use "en" for English or "zh" for Chinese.');
+		    }
+		}
+
+        function saveToFile() { //保存文件
+        	text = bulkDataGenerateText(true);
+        	const fullFileName = getCurrentDateTime() + '.quileg';//使用当前时间作为文件名
+        	if (currentLanguage == 'zh-CN') {
+        		text = `****************************************************************************************
+* 设备名称：` + document.getElementById('scr_e_deviceName').textContent + `
+* 版本号：1.0.0
+* 创建日期：` + getFormattedDate('zh') + `
+* 修改日期：` + getFormattedDate('zh') + `
+* 
+* 功能说明：
+* 该文件用于存储用户自定义的 Quileg 操作流程。包括但不限于以下功能：
+*   - 导入：将本文件导入到 Quileg 助手，用于编辑、存储和下载到 Quileg 设备中。
+*   - 处理：直接修改本文本文件，实现流程编辑。
+*   - 分发：将本流程文件分发给其他用户。
+*
+* 使用说明：
+* 1. 请确保遵守流程部分格式规范，详见本仓库 docs/protocol.md。
+* 2. 修改记录请附上版本号和日期，便于追踪更改历史。
+*
+* Quileg STM32 (open source) · MIT License
+*
+*****************************************************************************************
+
+` + text;
+        	}else{
+        		text = `****************************************************************************************
+* Device name: ` + document.getElementById('scr_e_deviceName').textContent + `
+* Version: 1.0.0
+* Created: ` + getFormattedDate('en') + `
+* Last Modified: ` + getFormattedDate('en') + `
+*
+* Functionality:
+* This file is used to store user-defined Quileg operational procedures. It includes, but is not limited to, the following functions:
+*   - Import: Import this file into the Quileg Assistant for editing, storing and downloading to the Quileg device.
+*   - Processing: Modify this text file directly to realize process editing.
+*   - Distribute: Distribute this process file to other users.
+*   - Distribute: distribute this process file to other users.
+* 
+* Usage Notes:
+* 1. Please make sure to follow the format specification of the process section, please refer to docs/protocol.md in this repository.
+* 2. Please include version number and date for any modifications, to facilitate change tracking.
+*
+* www.quileg.com
+*
+****************************************************************************************
+
+` + text;
+        	}
+        	const opts = {
+            	suggestedName: fullFileName,
+            	types: [{
+            		description: 'Text Files',
+            		accept: { 'text/plain': ['.quileg'] }
+            	}]
+        	};
+
+        	try {
+            	window.showSaveFilePicker(opts).then(fileHandle => {
+            		fileHandle.createWritable().then(writableStream => {
+            		writableStream.write(text).then(() => {
+            			writableStream.close();
+            		});
+            		});
+            	});
+        	} catch (error) {
+            	console.error('Error saving file:', error);
+        	}
+        }
+
+        function bulkDataGenerateText(copyAll = true) { // 流程变文本，默认参数为 true，表示拷贝全部内容
+        	function processItem(item, depth) {
+            	const bulkData = $(item).find('.bulkDataInput').val().trim();
+            	const title = $(item).find('.titleInput').val().trim();
+            	const tabs = '\t'.repeat(depth);
+            	let result = `${tabs}${bulkData}`;
+            	if (title) {
+            		result += ` // ${title}`;
+            	}
+            	result += '\n';
+
+            	const children = $(item).children('ol.dd-list').children('li.dd-item');
+            	if (children.length > 0) {
+            		children.each(function () {
+            		result += processItem(this, depth + 1);
+            		});
+            	}
+            	return result;
+        	}
+
+        	let result = '';
+        	if (copyAll) {
+            	$('#bulkDataContainer > .dd-list > .dd-item').each(function () {
+            		result += processItem(this, 0);
+            	});
+        	} else {
+            	if (selectedItem && selectedItem.closest('#bulkDataContainer').length > 0) {
+            		result = processItem(selectedItem[0], 0);
+            	}
+        	}
+        	return result;
+        }
+
+        function expandButton() {//展开
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+            var $nestable = $('#bulkDataContainer');
+            $nestable.nestable('expandAll');
+        }
+        function collapseButton() {//折叠
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+            var $nestable = $('#bulkDataContainer');
+            $nestable.nestable('collapseAll');
+        }
+
+		//对话窗，弹出层
+    	function toggleFloatingContainer(floatingContainer) {
+    		const this_floatingContainer = document.getElementById(floatingContainer);
+    		if (this_floatingContainer.style.display === 'none' || this_floatingContainer.style.display === '') {
+    			this_floatingContainer.style.display = 'block';
+    		} else {
+    			this_floatingContainer.style.display = 'none';
+    		}
+    	}
+
+    	$(function() {
+    		$("#floating_dataDisplay").draggable({ //对话
+    			handle: ".floating-header, .overlay"
+    		});
+            $("#floating_openSoftKeyboard").draggable({ //软键盘移动
+                handle: ".floating-header, .overlay"
+            });
+    	});
+	</script>
+	<script>
+        //键盘
+        const systemSwitch = document.getElementById('systemSwitch');
+        const guiKeys = document.querySelectorAll('.gui-key');
+        const ctrlKeys = Array.from(document.querySelectorAll(".keyboard-row .key")).filter(key => key.textContent.includes('Control'));
+        const altKeys = Array.from(document.querySelectorAll(".keyboard-row .key")).filter(key => key.textContent.includes('Option'));
+        const backspaceKeys = Array.from(document.querySelectorAll(".keyboard-row .key")).filter(key => key.textContent.includes('Backspace'));
+
+
+        let capsLockOn = false;
+        let pressedKeys = [];
+        let pressedHids = [];
+        const capsLockIndicator = document.getElementById('capsLockIndicator');
+        const letterKeys = Array.from(document.querySelectorAll(".keyboard-row .key")).filter(key => key.textContent.length === 1);
+
+
+        const specialKeys = ["Shift_l", "Shift_r", "Ctrl_l", "Alt_l", "GUI_l", "GUI_r", "Alt_r", "Ctrl_r"];
+
+        document.body.addEventListener('click', async function(event) {
+            if (event.target.classList.contains('key')) {
+                const div = event.target;
+                const key = div.getAttribute('data-key');
+                const hid = div.getAttribute('data-hid');
+
+                if (div.style.backgroundColor === 'lightgray') {
+                    div.style.backgroundColor = 'white';
+                    const index = pressedKeys.indexOf(key);
+                    if (index !== -1) {
+                        pressedKeys.splice(index, 1);
+                        pressedHids.splice(index, 1); // Remove corresponding HID
+                    }
+                } else {
+                    const nonSpecialKeysCount = pressedKeys.filter(k => !specialKeys.includes(k)).length;
+
+                    if (nonSpecialKeysCount < 6 || specialKeys.includes(key)) {
+                        div.style.backgroundColor = 'lightgray';
+                        if (!pressedKeys.includes(key)) {
+                            pressedKeys.push(key);
+                            pressedHids.push(hid); // Add corresponding HID
+                        }
+                    } else {
+                        document.getElementById('keyboard-message').innerText = translations[currentLanguage].keyboardMessage;
+                        setTimeout(() => {
+                            document.getElementById('keyboard-message').innerText = '';
+                        }, 2000);
+                        return;
+                    }
+                }
+                console.log(pressedHids);//已按下的键值 数组
+                console.log(pressedKeys);//已按下的键名 数组
+                document.getElementById('formatKeysshow').innerText = formatKeys(pressedKeys,'\n');//显示当前选择
+                updateButtondisabled();//更新按钮可用状态
+            }
+        });
+
+        // 将所有按键重置为抬起状态并清空数组的函数
+        function resetKeys() {
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(div => {
+                div.style.backgroundColor = 'white';
+            });
+            pressedKeys = [];
+            pressedHids = [];
+            document.getElementById('formatKeysshow').innerText = '';
+            document.getElementById('keyboard_titleInput').value = ''; // 清空输入框
+            console.log('All keys have been reset.');
+            updateButtondisabled();//更新按钮可用状态
+        }
+
+        document.getElementById("timed_mode").addEventListener('change', function() {
+            document.getElementById("pulldownkeytimeInput").disabled = !this.checked;
+        });
+
+        document.getElementById("hold_mode").addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById("pulldownkeytimeInput").disabled = true;
+            }
+        });
+
+        function send_keyboard_Serial_RxPacket() { //将当前键盘值加入流程
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }        	
+            const hold_mode = document.getElementById("hold_mode").checked;//长按模式
+            const timed_mode = document.getElementById("timed_mode").checked;//自动弹起模式
+            pulldownkeytimeInput = document.getElementById("pulldownkeytimeInput").value;//按下时长
+            if (hold_mode) {
+                pulldownkeytimeInput = 0;
+            }
+            const keyboard_array = createSerialPacket(pressedHids,pulldownkeytimeInput);
+            const pulldownkeytimeInput_text = pulldownkeytimeInput === 0 ? translations[currentLanguage].hold : pulldownkeytimeInput + "ms";
+            // 将 Serial_RxPacket 数组转换为文本格式
+            keyboard_presetValue = keyboard_array.map(byte => byte.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+            const keyboard_checkbox = document.getElementById("keyboard_executeCheckbox");
+            if (keyboard_checkbox.checked) {
+                sendFixedHexData(keyboard_presetValue);//透传执行
+            }
+            console.log(keyboard_presetValue);
+            keyboard_titleValue = formatKeys(pressedKeys,'+');//缺省标题
+            console.log(keyboard_titleValue);
+            const keyboard_titleInput_InputValue = $('#keyboard_titleInput').val();//读取用户自拟标题
+            console.log(keyboard_titleInput_InputValue);
+            addLineWithPreset(keyboard_presetValue,pulldownkeytimeInput_text + ' ' + keyboard_titleValue + (keyboard_titleInput_InputValue ? ' ' + keyboard_titleInput_InputValue : ''),true,false);
+            resetKeys();//还原键盘状态
+
+            // 创建提示框
+			if (currentLanguage == 'zh-CN'){
+	            showAlert('流程 “' + pulldownkeytimeInput_text + ' ' + keyboard_titleValue + (keyboard_titleInput_InputValue ? ' ' + keyboard_titleInput_InputValue : '') + '” 已成功添加到操作流', 'info');
+			}else{
+				showAlert('Process "' + pulldownkeytimeInput_text + ' ' + keyboard_titleValue + (keyboard_titleInput_InputValue ? ' ' + keyboard_titleInput_InputValue : '') + '" Successfully added to the workflow.', 'info');
+			}
+        }
+
+        function formatKeys(keys, Connector) { //排列组合键名称
+            // 定义优先级列表
+            const priority = [
+                'GUI_l', 'GUI_r', 'Alt_l', 'Alt_r', 'Ctrl_l', 'Ctrl_r', 'Shift_l', 'Shift_r',
+                'Esc', 'Backspace', 'Tab', 'Caps', 'Enter', 'Space'
+            ];
+
+            // Mac 键名映射
+            const macKeyNames = {
+                'GUI_l': 'Command',
+                'GUI_r': 'Command',
+                'Alt_l': 'Option',
+                'Alt_r': 'Option',
+                'Ctrl_l': 'Control',
+                'Ctrl_r': 'Control',
+                'Shift_l': 'Shift',
+                'Shift_r': 'Shift',
+                'Esc': 'Escape',
+                'Backspace': 'Delete',
+                'Tab': 'Tab',
+                'Caps': 'Caps Lock',
+                'Enter': 'Return',
+                'Space': 'Space'
+            };
+
+            // Windows 键名映射
+            const windowsKeyNames = {
+                'GUI_l': 'Win',
+                'GUI_r': 'Win',
+                'Alt_l': 'Alt',
+                'Alt_r': 'Alt',
+                'Ctrl_l': 'Ctrl',
+                'Ctrl_r': 'Ctrl',
+                'Shift_l': 'Shift',
+                'Shift_r': 'Shift',
+                'Esc': 'Esc',
+                'Backspace': 'Backspace',
+                'Tab': 'Tab',
+                'Caps': 'Caps Lock',
+                'Enter': 'Enter',
+                'Space': 'Space'
+            };
+
+            // 辅助函数，获取键名的优先级
+            function getPriority(key) {
+                // 特殊键
+                let index = priority.indexOf(key);
+                if (index !== -1) return index;
+                // 功能键F1-F12
+                if (key.startsWith('F') && !isNaN(key.substring(1))) {
+                    let num = parseInt(key.substring(1));
+                    return 20 + num;  // F1-F12 的优先级分别为 21-32
+                }
+                // 字母键
+                if (/^[a-zA-Z]$/.test(key)) {
+                    return 40 + key.toUpperCase().charCodeAt(0);  // 字母优先级为 41-66 (A-Z)
+                }
+                // 数字键
+                if (/^\d$/.test(key)) {
+                    return 70 + parseInt(key);  // 数字键优先级为 71-80 (0-9)
+                }
+                // 其他标点符号
+                return 100 + key.charCodeAt(0);
+            }
+
+            // 根据优先级排序
+            keys.sort((a, b) => getPriority(a) - getPriority(b));
+
+            // 根据 systemSwitch.checked 的值决定键名映射规则
+            const keyNames = systemSwitch.checked ? windowsKeyNames : macKeyNames;
+            keys = keys.map(key => keyNames[key] || key);
+
+            // 用 '+' 连接成字符串
+            return keys.join(Connector);
+        }
+
+        function createSerialPacket(pressedHids,pulldownkeytime) { //键盘合成包数据
+          const specialHids = ['0xe0', '0xe1', '0xe2', '0xe3', '0xe4', '0xe5', '0xe6', '0xe7'];
+          const specialBit = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80];
+          let modifierBitmap = 0x00;
+          const Serial_RxPacket = new Array(12).fill(0x00);
+
+          // Initialize packet header and tail
+          Serial_RxPacket[0] = 0xFF; // Packet header
+          Serial_RxPacket[1] = 0x01;
+          Serial_RxPacket[3] = Math.floor(pulldownkeytime / 10).toString(16);//0x0A;
+          Serial_RxPacket[10] = 0x01; // 重复一次
+          Serial_RxPacket[11] = 0xFE; // Packet tail
+
+          // Determine modifier keys status using specialBit
+          pressedHids.forEach(hid => {
+            const index = specialHids.indexOf(hid);
+            if (index !== -1) {
+              modifierBitmap |= specialBit[index];
+            }
+          });
+
+          // Set modifier bitmap
+          Serial_RxPacket[2] = modifierBitmap;
+
+          // Set remaining keys
+          let keyIndex = 4;
+          pressedHids.forEach(hid => {
+            if (specialHids.indexOf(hid) === -1 && keyIndex < 10) {
+              Serial_RxPacket[keyIndex++] = parseInt(hid, 16);
+            }
+          });
+
+          return Serial_RxPacket;
+        }
+
+        function displayMessage(message, type) {
+            const chatBox = document.getElementById('chatBox');
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            messageDiv.style.color = type === 'sent' ? 'blue' : 'green';
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+        }
+
+        function toggleCapsLock() { //键盘大小写按键指示灯切换
+            capsLockOn = !capsLockOn;
+            if (capsLockOn) {
+                capsLockIndicator.classList.add('caps-lock-on');
+            } else {
+                capsLockIndicator.classList.remove('caps-lock-on');
+            }
+            updateKeyLabels(capsLockOn);
+        }
+
+        function updateKeyLabels(capsOn) { //键盘上下档键盘符显示切换
+            letterKeys.forEach(key => {
+                let keyText = key.textContent;
+                if (/[a-zA-Z]/.test(keyText)) {
+                    key.textContent = capsOn ? keyText.toUpperCase() : keyText.toLowerCase();
+                } else {
+                    switch (keyText) {
+                        case '1':
+                        case '!':
+                            key.textContent = capsOn ? '!' : '1';
+                            break;
+                        case '2':
+                        case '@':
+                            key.textContent = capsOn ? '@' : '2';
+                            break;
+                        case '3':
+                        case '#':
+                            key.textContent = capsOn ? '#' : '3';
+                            break;
+                        case '4':
+                        case '$':
+                            key.textContent = capsOn ? '$' : '4';
+                            break;
+                        case '5':
+                        case '%':
+                            key.textContent = capsOn ? '%' : '5';
+                            break;
+                        case '6':
+                        case '^':
+                            key.textContent = capsOn ? '^' : '6';
+                            break;
+                        case '7':
+                        case '&':
+                            key.textContent = capsOn ? '&' : '7';
+                            break;
+                        case '8':
+                        case '*':
+                            key.textContent = capsOn ? '*' : '8';
+                            break;
+                        case '9':
+                        case '(':
+                            key.textContent = capsOn ? '(' : '9';
+                            break;
+                        case '0':
+                        case ')':
+                            key.textContent = capsOn ? ')' : '0';
+                            break;
+                        case '-':
+                        case '_':
+                            key.textContent = capsOn ? '_' : '-';
+                            break;
+                        case '=':
+                        case '+':
+                            key.textContent = capsOn ? '+' : '=';
+                            break;
+                        case '`':
+                        case '~':
+                            key.textContent = capsOn ? '~' : '`';
+                            break;
+                        case '[':
+                        case '{':
+                            key.textContent = capsOn ? '{' : '[';
+                            break;
+                        case ']':
+                        case '}':
+                            key.textContent = capsOn ? '}' : ']';
+                            break;
+                        case '\\':
+                        case '|':
+                            key.textContent = capsOn ? '|' : '\\';
+                            break;
+                        case ';':
+                        case ':':
+                            key.textContent = capsOn ? ':' : ';';
+                            break;
+                        case '\'':
+                        case '"':
+                            key.textContent = capsOn ? '"' : '\'';
+                            break;
+                        case ',':
+                        case '<':
+                            key.textContent = capsOn ? '<' : ',';
+                            break;
+                        case '.':
+                        case '>':
+                            key.textContent = capsOn ? '>' : '.';
+                            break;
+                        case '/':
+                        case '?':
+                            key.textContent = capsOn ? '?' : '/';
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const systemSwitch = document.getElementById('systemSwitch');
+            
+            // 检查 localStorage 中是否有存储的状态
+            const savedState = localStorage.getItem('systemSwitchState');
+            if (savedState === 'true') {
+                systemSwitch.checked = true;
+            } else {
+                systemSwitch.checked = false;
+            }
+
+            // 根据开关状态设置键盘系统
+            switchSystem();
+        });
+
+        function switchSystem() { //键盘系统切换
+
+            // 存储当前开关状态到 localStorage
+            localStorage.setItem('systemSwitchState', systemSwitch.checked);
+
+            if (systemSwitch.checked) {
+                guiKeys.forEach(icon => {
+                    icon.innerHTML = '<svg class="icon" width="15px" height="15px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M426.276571 574.866286v372.004571L36.571429 893.147429v-318.281143h389.705142z m0-424.594286v376.576H36.571429V203.995429zM987.428571 574.866286V1024l-518.290285-71.424V574.866286H987.428571zM987.428571 73.142857v453.705143H469.138286V144.566857z" fill="#444444"/></svg>';
+                });
+                ctrlKeys.forEach(key => {
+                    key.textContent = 'Ctrl';
+                });
+                altKeys.forEach(key => {
+                    key.textContent = 'Alt';
+                });
+                backspaceKeys.forEach(key => {
+                    key.textContent = 'Backspace';
+                });
+            } else {
+                guiKeys.forEach(icon => {
+                    icon.innerHTML = '<svg class="icon" width="15px" height="15px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M768 85.333333q70.656 0 120.661333 50.005333t50.005333 120.661333-50.005333 120.661333-120.661333 50.005333l-85.333333 0 0 170.666667 85.333333 0q70.656 0 120.661333 50.005333t50.005333 120.661333-50.005333 120.661333-120.661333 50.005333-120.661333-50.005333-50.005333-120.661333l0-85.333333-170.666667 0 0 85.333333q0 70.656-50.005333 120.661333t-120.661333 50.005333-120.661333-50.005333-50.005333-120.661333 50.005333-120.661333 120.661333-50.005333l85.333333 0 0-170.666667-85.333333 0q-70.656 0-120.661333-50.005333t-50.005333-120.661333 50.005333-120.661333 120.661333-50.005333 120.661333 50.005333 50.005333 120.661333l0 85.333333 170.666667 0 0-85.333333q0-70.656 50.005333-120.661333t120.661333-50.005333zM341.333333 768l0-85.333333-85.333333 0q-35.328 0-60.330667 25.002667t-25.002667 60.330667 25.002667 60.330667 60.330667 25.002667 60.330667-25.002667 25.002667-60.330667zM256 170.666667q-35.328 0-60.330667 25.002667t-25.002667 60.330667 25.002667 60.330667 60.330667 25.002667l85.333333 0 0-85.333333q0-35.328-25.002667-60.330667t-60.330667-25.002667zM597.333333 597.333333l0-170.666667-170.666667 0 0 170.666667 170.666667 0zM768 682.666667l-85.333333 0 0 85.333333q0 35.328 25.002667 60.330667t60.330667 25.002667 60.330667-25.002667 25.002667-60.330667-25.002667-60.330667-60.330667-25.002667zM768 170.666667q-35.328 0-60.330667 25.002667t-25.002667 60.330667l0 85.333333 85.333333 0q35.328 0 60.330667-25.002667t25.002667-60.330667-25.002667-60.330667-60.330667-25.002667z" fill="#444444"/></svg>';
+                });
+                ctrlKeys.forEach(key => {
+                    key.textContent = 'Control';
+                });
+                altKeys.forEach(key => {
+                    key.textContent = 'Option';
+                });
+                backspaceKeys.forEach(key => {
+                    key.textContent = 'Delete';
+                });
+            }
+        }
+	</script>
+	<script>
+		// 主页被控设备屏幕尺寸和名称设置
+	    // 页面加载时检查 localStorage 是否有保存的值并载入
+
+		let errorMessage = document.getElementById('error-message');
+	    let this_scr_e_Value = 0;//全局归位次数
+        let $scr_overlay = $('#scr_overlay'); //浮动层
+        let $scr_PosInput = $('#scr_Pos'); //弹出层文本归位次数
+        let scr_start = 0;
+        $scr_PosInput.text(Math.max(0, scr_start));//弹出层文本归位次数，写入步长数
+
+	    window.onload = function() {
+    		if (!checkSerialSupport()) {
+    			errorMessage.innerHTML = translations[currentLanguage].yourBrowserDoesNotSupportTheWebSerialAPI;//您的浏览器不支持 Web Serial API。请使用支持 Web Serial API 的浏览器（如 Chrome 89 及以上版本）并在设置中启用该功能。
+    		}
+
+	        let scr_e_Value = localStorage.getItem('scr_e_Value');
+
+	        // 检查 localStorage 是否有值且为整数
+	        if (scr_e_Value !== null && Number.isInteger(parseInt(scr_e_Value))) {
+	            this_scr_e_Value = parseInt(scr_e_Value); // 更新全局归位次数
+	        } else {
+	            this_scr_e_Value = 20; // 预设为 20
+	            localStorage.setItem('scr_e_Value', this_scr_e_Value); // 写回 localStorage
+	        }
+
+	        document.getElementById('scr_e_Value').textContent = this_scr_e_Value;
+
+	        if (localStorage.getItem('scr_e_deviceName')) {
+	            document.getElementById('scr_e_deviceName').textContent = localStorage.getItem('scr_e_deviceName');
+	        }
+
+	        //执行时间间隔
+	        const savedInterval = localStorage.getItem('intervalValue');
+	        if (savedInterval !== null) {
+	            document.getElementById('intervalInput').value = savedInterval;
+	        }
+
+	    };
+
+	    // 监听 执行时间间隔input 的失去焦点事件，自动保存值到 localStorage
+	    document.getElementById('intervalInput').addEventListener('blur', function() {
+	        const intervalValue = this.value;
+	        localStorage.setItem('intervalValue', intervalValue);
+	        console.log('Interval value saved:', intervalValue);
+	    });
+
+	    //打开设置弹出层
+        async function scr_open_tool() { 
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+    		if (!connectedPort && portsDropdown.options.length > 1) {
+    			portsDropdown.selectedIndex = 1;
+    			await handlePortChange();
+    		} else if (!connectedPort) {
+    			await selectPort();
+    		}
+    		if (connectedPort) { //已经连接
+	            scr_start = 0; //步长数
+	            $scr_PosInput.text(Math.max(0, scr_start));//弹出层文本归位次数，写入步长数
+
+		        var scr_e_deviceName = document.getElementById('scr_e_deviceName').textContent;//取得主页当前设备名称
+		        document.getElementById('scr_e_deviceInput').value = scr_e_deviceName;//写入弹出层设备名称
+
+	            $scr_overlay.show(); //浮动层弹出
+	            scr_overlay.style.display = 'flex';
+
+    		} else {
+    			statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>';//未选择设备
+    			statusDisplay.scrollTop = statusDisplay.scrollHeight;
+	        }
+        }
+
+	    // 保存值并更新显示
+		function scr_e_saveValues() {
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+		    var scr_e_new = parseInt($scr_PosInput.text(), 10); // 将弹出层文本归位次数转换为整数
+		    var scr_e_newDeviceName = document.getElementById('scr_e_deviceInput').value; // 弹出层设备名称输入框
+		    if (!isNaN(scr_e_new) && scr_e_new > 0) { // 确保 scr_e_new 是一个有效的数字并且大于或等于0
+			    $scr_overlay.hide();
+		        document.getElementById('scr_e_Value').textContent = scr_e_new; // 新的归位次数写入首页
+		        document.getElementById('scr_e_deviceName').textContent = scr_e_newDeviceName; // 新的设备名称写入首页
+		        this_scr_e_Value = scr_e_new; // 更新全局归位次数
+		        // 将值保存到 localStorage 中
+		        localStorage.setItem('scr_e_Value', scr_e_new); // 保存新的归位次数
+		        localStorage.setItem('scr_e_deviceName', scr_e_newDeviceName); // 保存新的设备名称
+		    } else {
+		        if (currentLanguage == 'zh-CN') {
+		            alert("归位次数必须大于0");
+		        } else {
+		            alert("The number of homing times must be greater than or equal to 0");
+		        }
+		    }
+		}	    
+
+        $('#scr_reset-btn_0').on('click', function() { //归位
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+            scr_start = 0;//步长数设为0
+            $scr_PosInput.text(Math.max(0, scr_start));//弹出层文本归位次数，写入步长数
+        	sendFixedHexData("FF 02 00 80 7F 00 00 00 00 00 01 FE");//最大步长 -128 到 127
+        });
+
+        $('#scr_reset-btn_xy').on('click', function() { //迈步
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+            scr_start++;
+            $scr_PosInput.text(Math.max(0, scr_start));//弹出层文本归位次数，写入步长数
+        	sendFixedHexData("FF 02 00 7F 80 00 00 00 00 00 01 FE");//最大步长 -128 到 127
+        });
+
+        $('#scr_close-tool').on('click', function() { //直接关闭弹出层
+            if (scr_start !== 0) {
+            	if (currentLanguage == 'zh-CN'){
+	                if (!confirm("有未保存的更改。是否不保存退出？")) return;
+	            }else{
+	            	if (!confirm("There are unsaved changes. Does it exit without saving?")) return;
+	            }
+            }
+            $scr_overlay.hide();
+        });
+	</script>
+    <script>
+        let $mouse_overlay = $('#mouse_overlay');//弹出层
+        let $mouse_xPosInput = $('#mouse_xPos');//鼠标移动X
+        let $mouse_yPosInput = $('#mouse_yPos');//鼠标移动Y
+        let $mouse_titleInput = $('#mouse_titleInput');//标题
+        let mouse_startX = 0, mouse_startY = 0;
+        let mouse_homing_set = 0;//缺省归位方向左下角
+        let maximum_repetition = 255;//单一流程最大重复次数
+        maximum_repetition = Math.max(0, Math.min(255, maximum_repetition));// 限制输入在0到255之间，最大将被强制限制为 255
+
+        function mouse_updateMeasureArea() { //更新鼠标移动值的显示
+            $mouse_xPosInput.text(mouse_startX);
+            $mouse_yPosInput.text(mouse_startY);
+            // if ((mouse_startX == 0)||(mouse_startY ==0)) {// x 或 y 任意一个为 0 即取消合并勾选
+            // 	$('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('checked', false);//取消 x、y合并后同时移动勾选
+            // }
+            if ((mouse_startX != 0)||(mouse_startY !=0)) {// x 或 y 任意一个不为 0 即显示勾选选项
+			    $('#show_mouse_xAndyAreCombinedAndMovedAtTheSameTime').removeClass('display_none');//x、y合并后同时移动 移除隐藏
+			    $('#show_mouse_holdDownTheButtonWhileMoving').removeClass('display_none');//按住按键同时移动 移除隐藏
+			}else{
+			    $('#show_mouse_xAndyAreCombinedAndMovedAtTheSameTime').addClass('display_none');//x、y合并后同时移动 勾选隐藏
+			    $('#show_mouse_holdDownTheButtonWhileMoving').addClass('display_none');//按住按键同时移动 勾选隐藏
+			}
+        }
+
+        async function mouse_open_tool() { //弹出浮动层
+            if (!connectedPort && portsDropdown.options.length > 1) { //连接设备
+                portsDropdown.selectedIndex = 1;
+                await handlePortChange();
+            } else if (!connectedPort) {
+                await selectPort();
+            }
+            if (connectedPort) { //已连接设备
+                mouse_startX = 0;//初始化值
+                mouse_startY = 0;
+                $mouse_xPosInput.text(0);//初始化显示
+                $mouse_yPosInput.text(0);
+                $mouse_titleInput.val('');
+	            $('#mouse_addtoWorkflowCheckbox').prop('checked', false);//取消归位勾选
+			    $('#show_mouse_addtoWorkflowCheckbox').addClass('display_none');//校验添加到流程勾选隐藏
+
+	            $('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('checked', false);//取消 x、y合并后同时移动勾选
+			    $('#show_mouse_xAndyAreCombinedAndMovedAtTheSameTime').addClass('display_none');//x、y合并后同时移动 勾选隐藏
+			    $('#show_mouse_holdDownTheButtonWhileMoving').addClass('display_none');//按住按键同时移动 勾选隐藏
+
+			    $('#mouse_calibration').addClass('display_none');//校验工具移除隐藏
+			    $('.mouse_homing').prop('disabled', false);
+			    $('.mouse_homing').removeClass('mouse_homing_direction');
+			    $('#calibration').prop('disabled', false);
+			    $('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('disabled', false);
+
+				$('#mouse_holdDownTheButtonWhileMoving').prop('disabled', false);//允许操作
+				$('#mouse_holdDownTheButtonWhileMoving').prop('checked', false);//取消归位勾选
+
+				$('#mouse_move_button_left').prop('disabled', false);//允许操作
+				$('#mouse_move_button_right').prop('disabled', false);//允许操作
+				$('#mouse_move_button_middle').prop('disabled', false);//允许操作
+				$('#mouse_move_button_left').prop('checked', false);//取消归位勾选
+				$('#mouse_move_button_right').prop('checked', false);//取消归位勾选
+				$('#mouse_move_button_middle').prop('checked', false);//取消归位勾选
+
+				$('#show_mouse_combined_checkbox').addClass('display_none');//隐藏移动时按键
+
+				$('#mouse_move_complete_button_left').prop('disabled', false);//允许操作
+				$('#mouse_move_complete_button_left').prop('checked', false);//取消归位勾选
+				$('#mouse_move_complete_button_right').prop('disabled', false);//允许操作
+				$('#mouse_move_complete_button_right').prop('checked', false);//取消归位勾选
+				$('#mouse_move_complete_button_middle').prop('disabled', false);//允许操作
+				$('#mouse_move_complete_button_middle').prop('checked', false);//取消归位勾选
+
+				// 滚轮初始化
+				wheel = 0;
+				updateMouseWheelDisplay();// 初始化滚轮按钮状态
+
+                $mouse_overlay.show();//弹出层
+                mouse_overlay.style.display = 'flex';
+                mouse_updateMeasureArea();
+            } else {//送设备信息窗口
+                statusDisplay.innerHTML += '<div class="statusDisplay-warning-data">' + translations[currentLanguage].noDeviceSelected + '</div>';//未选择设备
+                statusDisplay.scrollTop = statusDisplay.scrollHeight;
+            }
+        }
+
+		function delay(ms) {//循环执行 等待时间
+		    return new Promise(resolve => setTimeout(resolve, ms));
+		}
+
+		async function mouse_homing(direction) {//归位到左下角循环执行
+			mouse_homing_set = direction.getAttribute('data-direction');//选择
+			$('.mouse_homing').prop('disabled', true);
+			$('.mouse_homing').removeClass('mouse_homing_direction');//移除全部当前选择
+			$(direction).addClass('mouse_homing_direction');//标注当前选择
+			$('#calibration').prop('disabled', true);
+			$('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('disabled', true);
+		    for (var i = 0; i < this_scr_e_Value; i++) {
+		    	switch(mouse_homing_set) {
+                	case "0": //左下角 
+		        		sendFixedHexData("FF 02 00 80 7F 00 00 00 00 00 01 FE"); // 发送数据
+		        		break;
+                	case "1": //左上角
+		        		sendFixedHexData("FF 02 00 80 80 00 00 00 00 00 01 FE"); // 发送数据
+		        		break;
+                	case "2": //右上角 
+		        		sendFixedHexData("FF 02 00 7F 80 00 00 00 00 00 01 FE"); // 发送数据
+		        		break;
+                	case "3": //右下角
+		        		sendFixedHexData("FF 02 00 7F 7F 00 00 00 00 00 01 FE"); // 发送数据
+		        		break;
+		        }
+		        await delay(80); // 等待 80 毫秒
+	            mouse_startX = 0;
+	            mouse_startY = 0;
+	            mouse_updateMeasureArea();
+		    }
+            $('#mouse_addtoWorkflowCheckbox').prop('checked', true);//勾选归位
+		    $('#show_mouse_addtoWorkflowCheckbox').removeClass('display_none');//校验添加到流程勾选移除隐藏
+		    $('#mouse_calibration').removeClass('display_none');//校验工具移除隐藏
+		    $('.mouse_homing').prop('disabled', false);
+		    $('#calibration').prop('disabled', false);
+		    $('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('disabled', false);
+		}
+
+		async function calibration() {//鼠标校验位置，先归位在执行移动
+			$('#calibration').prop('disabled', true);
+			$('.mouse_homing').prop('disabled', true);
+			$('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('disabled', true);
+		    for (var i = 0; i < this_scr_e_Value; i++) {
+		    	switch(mouse_homing_set) {
+                	case "0": //左下角 
+		        		sendFixedHexData("FF 02 00 80 7F 00 00 00 00 00 01 FE"); // 发送数据
+		        	break;
+                	case "1": //左上角
+		        		sendFixedHexData("FF 02 00 80 80 00 00 00 00 00 01 FE"); // 发送数据
+		        	break;
+                	case "2": //右上角 
+		        		sendFixedHexData("FF 02 00 7F 80 00 00 00 00 00 01 FE"); // 发送数据
+		        	break;
+                	case "3": //右下角
+		        		sendFixedHexData("FF 02 00 7F 7F 00 00 00 00 00 01 FE"); // 发送数据
+		        	break;
+		        }
+		        await delay(80); // 等待 80 毫秒
+		    }
+		    //先横后竖
+		    // if (mouse_startX > 0) {//横向移动 正数
+			//     for (var i = 0; i < mouse_startX; i++) { //右移
+			//         sendFixedHexData("FF 02 00 0A 00 00 00 00 00 00 00 FE");//	10
+			//         await delay(100); // 等待 100 毫秒
+			//     }
+		    // }else if(mouse_startX < 0){//横行移动 负数
+			//     for (var i = 0; i < Math.abs(mouse_startX); i++) { //左移
+			//         sendFixedHexData("FF 02 00 F6 00 00 00 00 00 00 00 FE");//	-10
+			//         await delay(100); // 等待 100 毫秒
+			//     }
+		    // }
+		    // await delay(80); // 等待 80 毫秒
+		    // if (mouse_startY > 0) {//垂直移动 正数
+			//     for (var i = 0; i < mouse_startY; i++) { //上移
+			//         sendFixedHexData("FF 02 00 00 F6 00 00 00 00 00 00 FE");//	-10
+			//         await delay(100); // 等待 100 毫秒
+			//     }		    	
+		    // }else if(mouse_startY < 0){//垂直移动 负数
+			//     for (var i = 0; i < Math.abs(mouse_startY); i++) { //下移
+			//         sendFixedHexData("FF 02 00 00 0A 00 00 00 00 00 00 FE");//	10
+			//         await delay(100); // 等待 100 毫秒
+			//     }
+		    // }
+		    // 先走斜向，看起来不会那么蠢
+		    const diagonalSteps = Math.min(Math.abs(mouse_startX), Math.abs(mouse_startY));
+		    // 计算剩余的 x 和 y 方向步数
+		    const remainingStepsX = Math.abs(mouse_startX) - diagonalSteps;
+		    const remainingStepsY = Math.abs(mouse_startY) - diagonalSteps;
+		    // 初始化方向标志
+		    const directionX = mouse_startX > 0 ? 1 : -1;  // 向右为1，向左为-1
+		    const directionY = mouse_startY > 0 ? 1 : -1;  // 向上为1，向下为-1
+		    // 鼠标移动合并
+            const mouse_xAndyAreCombinedAndMovedAtTheSameTime = document.getElementById("mouse_xAndyAreCombinedAndMovedAtTheSameTime");//x、y合并后同时移动勾选
+		    // 根据 x 和 y 的符号分四个斜方向处理
+		    for (let i = 0; i < diagonalSteps; i++) {
+		        if (directionX > 0 && directionY > 0) {
+		            // move right-up
+		            if (mouse_xAndyAreCombinedAndMovedAtTheSameTime.checked) {//x、y合并后同时移动勾选
+			            sendFixedHexData("FF 02 00 0A F6 00 00 00 00 00 01 FE");//	x 10 y -10
+			            await delay(80); // 等待 80 毫秒
+		            }else{
+			            sendFixedHexData("FF 02 00 0A 00 00 00 00 00 00 01 FE");//	x 10
+			            await delay(80); // 等待 80 毫秒
+			            sendFixedHexData("FF 02 00 00 F6 00 00 00 00 00 01 FE");//	y -10
+			            await delay(80); // 等待 80 毫秒
+			        }
+		        } else if (directionX > 0 && directionY < 0) {
+		            // move right-down
+		            if (mouse_xAndyAreCombinedAndMovedAtTheSameTime.checked) {//x、y合并后同时移动勾选
+			            sendFixedHexData("FF 02 00 0A 0A 00 00 00 00 00 01 FE");//	x 10 y 10
+			            await delay(80); // 等待 80 毫秒
+		            }else{
+			            sendFixedHexData("FF 02 00 0A 00 00 00 00 00 00 01 FE");//	x 10
+			            await delay(80); // 等待 80 毫秒
+			            sendFixedHexData("FF 02 00 00 0A 00 00 00 00 00 01 FE");//	y 10
+			            await delay(80); // 等待 80 毫秒
+			        }
+		        } else if (directionX < 0 && directionY > 0) {
+		            // move left-up
+		            if (mouse_xAndyAreCombinedAndMovedAtTheSameTime.checked) {//x、y合并后同时移动勾选
+			            sendFixedHexData("FF 02 00 F6 F6 00 00 00 00 00 01 FE");//	x -10 y -10
+			            await delay(80); // 等待 80 毫秒
+		            }else{
+			            sendFixedHexData("FF 02 00 F6 00 00 00 00 00 00 01 FE");//	x -10
+			            await delay(80); // 等待 80 毫秒
+			            sendFixedHexData("FF 02 00 00 F6 00 00 00 00 00 01 FE");//	y -10
+			            await delay(80); // 等待 80 毫秒
+			        }
+		        } else if (directionX < 0 && directionY < 0) {
+		            // move left-down
+		            if (mouse_xAndyAreCombinedAndMovedAtTheSameTime.checked) {//x、y合并后同时移动勾选
+			            sendFixedHexData("FF 02 00 F6 0A 00 00 00 00 00 01 FE");//	x -10 y 10
+			            await delay(80); // 等待 80 毫秒
+		            }else{
+			            sendFixedHexData("FF 02 00 F6 00 00 00 00 00 00 01 FE");//	x -10
+			            await delay(80); // 等待 80 毫秒
+			            sendFixedHexData("FF 02 00 00 0A 00 00 00 00 00 01 FE");//	y 10
+			            await delay(80); // 等待 80 毫秒
+			        }
+		        }
+		    }
+		    // 处理剩余的 x 方向移动
+		    for (let i = 0; i < remainingStepsX; i++) {
+		        if (directionX > 0) {
+		            // move right
+		            sendFixedHexData("FF 02 00 0A 00 00 00 00 00 00 01 FE");//	10
+		        } else {
+		            // move left
+		            sendFixedHexData("FF 02 00 F6 00 00 00 00 00 00 01 FE");//	-10
+		        }
+		        await delay(80); // 等待 80 毫秒
+		    }
+		    // 处理剩余的 y 方向移动
+		    for (let i = 0; i < remainingStepsY; i++) {
+		        if (directionY > 0) {
+		            // move up
+		            sendFixedHexData("FF 02 00 00 F6 00 00 00 00 00 01 FE");//	-10
+		        } else {
+		            // move down
+		            sendFixedHexData("FF 02 00 00 0A 00 00 00 00 00 01 FE");//	10
+		        }
+		        await delay(80); // 等待 80 毫秒
+		    }
+		    $('#calibration').prop('disabled', false);
+		    $('.mouse_homing').prop('disabled', false);
+		    $('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('disabled', false);
+		}
+
+        $('#mouse_close-tool').on('click', function() { //弹出层右上角关闭按钮
+            if (mouse_startX !== 0 || mouse_startY !== 0 || wheel !== 0) {
+                if (currentLanguage == 'zh-CN'){
+                    if (!confirm("有未保存的更改。是否不保存退出？")) return;
+                }else{
+                    if (!confirm("There are unsaved changes. Does it exit without saving?")) return;
+                }
+            }
+            $mouse_overlay.hide();
+        });
+
+		function toHexByte(decimalNumber) {//将10进制数转换为一个字节的十六进制文本
+		    // 限制输入在0到255之间
+		    decimalNumber = Math.max(0, Math.min(255, decimalNumber));
+
+		    // 转换为十六进制，并确保是两个字符
+		    let hexString = decimalNumber.toString(16).toUpperCase();
+
+		    // 如果只有一个字符，前面补0
+		    if (hexString.length === 1) {
+		        hexString = '0' + hexString;
+		    }
+		    return hexString;
+		}
+
+		function check_holdDownTheButtonWhileMoving() {//切换显示移动时，是否需要按下某个按键
+            if (document.getElementById("mouse_holdDownTheButtonWhileMoving").checked) {
+            	document.getElementById("show_mouse_combined_checkbox").classList.remove("display_none");
+            }else{
+            	document.getElementById("show_mouse_combined_checkbox").classList.add("display_none");
+            }
+		}
+
+		function mouseButtonsToHex(left, right, middle) {//根据鼠标按键选择，输出结果
+		    // 将左键、右键和中键的值转换为二进制位并组合成一个字节
+		    let binaryValue = (middle << 2) | (right << 1) | left;
+
+		    // 将二进制值转换为十六进制字符串
+		    let hexValue = binaryValue.toString(16).toUpperCase();
+
+		    // 如果结果是一个字符（低于16），则在前面补一个零
+		    return hexValue.padStart(2, '0');
+		}
+
+        function send_mouse_Serial_RxPacket() { //将当前鼠标加入流程
+		    if (isRunning) {
+		    	if (currentLanguage == 'zh-CN') {
+		    		showAlert('任务正在执行，无法完成此操作', 'error');
+		    	}else{
+		    		showAlert('The task is running and this operation cannot be completed', 'error');
+		    	}
+		    	return
+		    }
+
+		    //是否嵌套插入
+		    nestMode = false;
+
+            //空操作
+            if ($mouse_titleInput.val()!="") {
+            	addLineWithPreset("FF 00 00 00 00 00 00 00 00 00 01 FE",$mouse_titleInput.val(),false,false);//空操作
+            	nestMode = true;
+            }
+
+            //归位
+            const mouse_addtoWorkflowCheckbox = document.getElementById("mouse_addtoWorkflowCheckbox");//如果操作过了归位
+            if (mouse_addtoWorkflowCheckbox.checked) {
+				//归位 按“单一流程最大重复次数”计算次数
+	            for (var i = 0; i < Math.floor(this_scr_e_Value / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			    	switch(mouse_homing_set) {
+	                	case "0": //左下角 
+			        		addLineWithPreset("FF 02 00 80 7F 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",translations[currentLanguage].homing_0,false,nestMode);//归位
+			        	break;
+	                	case "1": //左上角
+			        		addLineWithPreset("FF 02 00 80 80 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",translations[currentLanguage].homing_1,false,nestMode);//归位
+			        	break;
+	                	case "2": //右上角 
+			        		addLineWithPreset("FF 02 00 7F 80 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",translations[currentLanguage].homing_2,false,nestMode);//归位
+			        	break;
+	                	case "3": //右下角
+			        		addLineWithPreset("FF 02 00 7F 7F 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",translations[currentLanguage].homing_3,false,nestMode);//归位
+			        	break;
+			        }
+				}
+			    //归位 取模，剩下的次数
+			    if (this_scr_e_Value % maximum_repetition != 0) {
+			    	switch(mouse_homing_set) {
+	                	case "0": //左下角 
+			        		addLineWithPreset("FF 02 00 80 7F 00 00 00 00 00 " + toHexByte(this_scr_e_Value % maximum_repetition) + " FE",translations[currentLanguage].homing_0,false,nestMode);//归位
+			        	break;
+	                	case "1": //左上角
+			        		addLineWithPreset("FF 02 00 80 80 00 00 00 00 00 " + toHexByte(this_scr_e_Value % maximum_repetition) + " FE",translations[currentLanguage].homing_1,false,nestMode);//归位
+			        	break;
+	                	case "2": //右上角 
+			        		addLineWithPreset("FF 02 00 7F 80 00 00 00 00 00 " + toHexByte(this_scr_e_Value % maximum_repetition) + " FE",translations[currentLanguage].homing_2,false,nestMode);//归位
+			        	break;
+	                	case "3": //右下角
+			        		addLineWithPreset("FF 02 00 7F 7F 00 00 00 00 00 " + toHexByte(this_scr_e_Value % maximum_repetition) + " FE",translations[currentLanguage].homing_3,false,nestMode);//归位
+			        	break;
+			        }
+				}
+            }
+
+            //根据是否需要加入按下按键同时移动勾选
+            mouse_move_button_HexByte = "00";//用于按键状态值，无按键则为 00
+            mouse_move_button_HexByte_titleValue = "";//标题鼠标按键
+            releaseTheMouseButton = false;//是否需要释放按键
+            if (document.getElementById("mouse_holdDownTheButtonWhileMoving").checked){
+				var mouse_move_left_isChecked = document.getElementById("mouse_move_button_left").checked ? 1 : 0;
+				var mouse_move_right_isChecked = document.getElementById("mouse_move_button_right").checked ? 1 : 0;
+				var mouse_move_middle_isChecked = document.getElementById("mouse_move_button_middle").checked ? 1 : 0;
+				mouse_move_button_HexByte = mouseButtonsToHex(mouse_move_left_isChecked, mouse_move_right_isChecked, mouse_move_middle_isChecked);
+				mouse_move_button_HexByte_titleValue += document.getElementById("mouse_move_button_left").checked ? translations[currentLanguage].mouseLeftbutton:"";
+				mouse_move_button_HexByte_titleValue += document.getElementById("mouse_move_button_right").checked ? translations[currentLanguage].mouseRightButton:"";
+				mouse_move_button_HexByte_titleValue += document.getElementById("mouse_move_button_middle").checked ? translations[currentLanguage].mouseMiddleButton:"";
+				mouse_move_button_HexByte_titleValue = mouse_move_button_HexByte_titleValue != "" ? translations[currentLanguage].holdDown + mouse_move_button_HexByte_titleValue + " + ": "";
+				releaseTheMouseButton =  mouse_move_button_HexByte_titleValue == "" ? false : true;
+			}
+
+			//移动
+			$('#calibration').prop('disabled', true);
+			$('.mouse_homing').prop('disabled', true);
+			$('#mouse_xAndyAreCombinedAndMovedAtTheSameTime').prop('disabled', true);
+			$('#mouse_holdDownTheButtonWhileMoving').prop('disabled', true);
+			$('#mouse_move_button_left').prop('disabled', true);
+			$('#mouse_move_button_right').prop('disabled', true);
+			$('#mouse_move_button_middle').prop('disabled', true);
+			$('#mouse_move_complete_button_left').prop('disabled', true);//允许操作
+			$('#mouse_move_complete_button_right').prop('disabled', true);//允许操作
+			$('#mouse_move_complete_button_middle').prop('disabled', true);//允许操作
+
+			this_have_addLineWithPreset = false;//是否输出了鼠标移动
+            const mouse_xAndyAreCombinedAndMovedAtTheSameTime = document.getElementById("mouse_xAndyAreCombinedAndMovedAtTheSameTime");//x、y合并后同时移动勾选
+            if (mouse_xAndyAreCombinedAndMovedAtTheSameTime.checked) {// 鼠标移动合并
+			    // 先走斜向，看起来不会那么蠢
+			    const diagonalSteps = Math.min(Math.abs(mouse_startX), Math.abs(mouse_startY));
+			    // 计算剩余的 x 和 y 方向步数
+			    const remainingStepsX = Math.abs(mouse_startX) - diagonalSteps;
+			    const remainingStepsY = Math.abs(mouse_startY) - diagonalSteps;
+			    // 初始化方向标志
+			    const directionX = mouse_startX > 0 ? 1 : -1;  // 向右为1，向左为-1
+			    const directionY = mouse_startY > 0 ? 1 : -1;  // 向上为1，向下为-1
+			    // 根据 x 和 y 的符号分四个斜方向处理
+		        if (directionX > 0 && directionY > 0) {
+		            // move right-up 鼠标右上移
+		            for (var i = 0; i < Math.floor(diagonalSteps / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			            addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A F6 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightAndUpToMove,false,nestMode);//	x 10 y -10
+			            this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+			        if (diagonalSteps % maximum_repetition != 0) {
+			        	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A F6 00 00 00 00 00 " + toHexByte(diagonalSteps % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightAndUpToMove,false,nestMode);//	x 10 y -10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+		        } else if (directionX > 0 && directionY < 0) {
+		            // move right-down 鼠标右下移
+		            for (var i = 0; i < Math.floor(diagonalSteps / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			            addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A 0A 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightAndDownToMove,false,nestMode);//	x 10 y 10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+			        if (diagonalSteps % maximum_repetition != 0) {
+			        	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A 0A 00 00 00 00 00 " + toHexByte(diagonalSteps % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightAndDownToMove,false,nestMode);//	x 10 y 10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+		        } else if (directionX < 0 && directionY > 0) {
+		            // move left-up 鼠标左上移
+		            for (var i = 0; i < Math.floor(diagonalSteps / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			            addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 F6 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftAndUpToMove,false,nestMode);//	x -10 y -10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+			        if (diagonalSteps % maximum_repetition != 0) {
+			        	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 F6 00 00 00 00 00 " + toHexByte(diagonalSteps % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftAndUpToMove,false,nestMode);//	x -10 y -10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+		        } else if (directionX < 0 && directionY < 0) {
+		            // move left-down 鼠标左下移
+		            for (var i = 0; i < Math.floor(diagonalSteps / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			            addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 0A 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftAndDownToMove,false,nestMode);//	x -10 y 10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+			        if (diagonalSteps % maximum_repetition != 0) {
+			        	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 0A 00 00 00 00 00 " + toHexByte(diagonalSteps % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftAndDownToMove,false,nestMode);//	x -10 y 10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+		        }
+			    // 处理剩余的 x 方向移动
+		        if (directionX > 0) {
+		            // move right
+		            for (var i = 0; i < Math.floor(remainingStepsX / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			            addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A 00 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+			        if (remainingStepsX % maximum_repetition != 0) {
+			        	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A 00 00 00 00 00 00 " + toHexByte(remainingStepsX % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+		        } else {
+		            // move left
+		            for (var i = 0; i < Math.floor(remainingStepsX / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+		            	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 00 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftToMove,false,nestMode);//	-10		            	
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+		            }
+		            if (remainingStepsX % maximum_repetition != 0) {
+		            	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 00 00 00 00 00 00 " + toHexByte(remainingStepsX % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftToMove,false,nestMode);//	-10		            	
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+		            }
+		        }
+			    // 处理剩余的 y 方向移动
+		        if (directionY > 0) {
+		            // move up
+		            for (var i = 0; i < Math.floor(remainingStepsY / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			            addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 F6 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseUpToMove,false,nestMode);//	-10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+			        if (remainingStepsY % maximum_repetition != 0) {
+			        	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 F6 00 00 00 00 00 " + toHexByte(remainingStepsY % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseUpToMove,false,nestMode);//	-10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+		        } else {
+		            // move down
+		            for (var i = 0; i < Math.floor(remainingStepsY / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+			            addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 0A 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseDownToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+			        if (remainingStepsY % maximum_repetition != 0) {
+			        	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 0A 00 00 00 00 00 " + toHexByte(remainingStepsY % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseDownToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+			        }
+		        }
+			}else{// 鼠标移动分开
+			    //先横后竖
+			    if (mouse_startX > 0) {//横向移动 正数
+				    //右移
+				    for (var i = 0; i < Math.floor(mouse_startX / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+				        addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A 00 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+				    }
+				    if (mouse_startX % maximum_repetition != 0) {
+				    	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 0A 00 00 00 00 00 00 " + toHexByte(mouse_startX % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseRightToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+				    }
+			    }else if(mouse_startX < 0){//横行移动 负数
+				    //左移
+				    for (var i = 0; i < Math.floor(Math.abs(mouse_startX) / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+				        addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 00 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftToMove,false,nestMode);//	-10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+				    }
+				    if (Math.abs(mouse_startX) % maximum_repetition != 0) {
+				    	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " F6 00 00 00 00 00 00 " + toHexByte(Math.abs(mouse_startX) % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseLeftToMove,false,nestMode);//	-10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+					}
+			    }
+			    if (mouse_startY > 0) {//垂直移动 正数
+				    //上移
+				    for (var i = 0; i < Math.floor(mouse_startY / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+				        addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 F6 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseUpToMove,false,nestMode);//	-10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+				    }
+				    if (mouse_startY % maximum_repetition != 0) {
+				    	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 F6 00 00 00 00 00 " + toHexByte(mouse_startY % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseUpToMove,false,nestMode);//	-10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+				    }
+			    }else if(mouse_startY < 0){//垂直移动 负数
+				    //下移
+				    for (var i = 0; i < Math.floor(Math.abs(mouse_startY) / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+				        addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 0A 00 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseDownToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+				    }
+				    if (Math.abs(mouse_startY) % maximum_repetition != 0) {
+				    	addLineWithPreset("FF 02 " + mouse_move_button_HexByte + " 00 0A 00 00 00 00 00 " + toHexByte(Math.abs(mouse_startY) % maximum_repetition) + " FE",mouse_move_button_HexByte_titleValue + translations[currentLanguage].mouseDownToMove,false,nestMode);//	10
+			        	this_have_addLineWithPreset = true;//鼠标移动标志
+				    }
+			    }
+			}
+			if (this_have_addLineWithPreset && releaseTheMouseButton){//如果有移动，且加入了按键，则需要释放按钮
+				addLineWithPreset("FF 02 00 00 00 00 00 00 00 00 01 FE",translations[currentLanguage].releaseTheMouseButton,false,nestMode);
+			}
+
+			//滚轮
+			if (wheel<0){//滚轮向上
+				for (var i = 0; i < Math.floor(Math.abs(wheel) / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+					addLineWithPreset("FF 02 00 00 00 FF 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",translations[currentLanguage].wheelUp,false,nestMode);
+				}
+				if (Math.abs(wheel) % maximum_repetition != 0) {
+					addLineWithPreset("FF 02 00 00 00 FF 00 00 00 00 " + toHexByte(Math.abs(wheel) % maximum_repetition) + " FE",translations[currentLanguage].wheelUp,false,nestMode);
+				}
+			}else if (wheel>0){//滚轮向下
+				for (var i = 0; i < Math.floor(wheel / maximum_repetition); i++) {//整除“单一流程最大重复次数”
+					addLineWithPreset("FF 02 00 00 00 01 00 00 00 00 " + toHexByte(maximum_repetition) + " FE",translations[currentLanguage].wheelDown,false,nestMode);
+				}
+				if (wheel % maximum_repetition != 0) {
+					addLineWithPreset("FF 02 00 00 00 01 00 00 00 00 " + toHexByte(wheel % maximum_repetition) + " FE",translations[currentLanguage].wheelDown,false,nestMode);
+				}
+			}
+
+			//按键
+            mouse_move_complete_button_HexByte = "00";//用于按键状态值，无按键则为 00
+            mouse_move_complete_button_HexByte_titleValue = "";//标题鼠标按键
+			var mouse_move_complete_left_isChecked = document.getElementById("mouse_move_complete_button_left").checked ? 1 : 0;
+			var mouse_move_complete_right_isChecked = document.getElementById("mouse_move_complete_button_right").checked ? 1 : 0;
+			var mouse_move_complete_middle_isChecked = document.getElementById("mouse_move_complete_button_middle").checked ? 1 : 0;
+			mouse_move_complete_button_HexByte = mouseButtonsToHex(mouse_move_complete_left_isChecked, mouse_move_complete_right_isChecked, mouse_move_complete_middle_isChecked);
+			if (mouse_move_complete_button_HexByte != "00") {
+				mouse_move_complete_button_HexByte_titleValue += translations[currentLanguage].holdDown;
+				mouse_move_complete_button_HexByte_titleValue += document.getElementById("mouse_move_complete_button_left").checked ? translations[currentLanguage].mouseLeftbutton:"";
+				mouse_move_complete_button_HexByte_titleValue += document.getElementById("mouse_move_complete_button_right").checked ? translations[currentLanguage].mouseRightButton:"";
+				mouse_move_complete_button_HexByte_titleValue += document.getElementById("mouse_move_complete_button_middle").checked ? translations[currentLanguage].mouseMiddleButton:"";
+				addLineWithPreset("FF 02 " + mouse_move_complete_button_HexByte + " 00 00 00 00 00 00 00 01 FE",mouse_move_complete_button_HexByte_titleValue,false,nestMode);
+				addLineWithPreset("FF 02 00 00 00 00 00 00 00 00 01 FE",translations[currentLanguage].releaseTheMouseButton,false,nestMode);
+			}
+
+            // 创建提示框
+			if (currentLanguage == 'zh-CN'){
+	            showAlert('鼠标流程' + (($mouse_titleInput.val()=="")?"":(" “" + $mouse_titleInput.val() + "” ")) + '已成功添加到操作流', 'info');
+			}else{
+	            showAlert('Mouse process "' + (($mouse_titleInput.val()=="")?"":(" “" + $mouse_titleInput.val() + "” ")) + '" Successfully added to the workflow.', 'info');
+			}
+            $mouse_overlay.hide();
+        };
+
+        $(document).on('keydown', function(event) {
+        	//键盘按下
+        }).on('keyup', function(event) {
+        	//键盘抬起
+            if ($mouse_overlay.is(':visible')) {
+                switch(event.key) {
+                    case 'ArrowUp': 
+                        mouse_startY += 1;
+                        sendFixedHexData("FF 02 00 00 F6 00 00 00 00 00 01 FE");//	-10
+                        break;
+                    case 'ArrowDown': 
+                        mouse_startY -= 1; 
+                        sendFixedHexData("FF 02 00 00 0A 00 00 00 00 00 01 FE");//	10
+                        break;
+                    case 'ArrowLeft': 
+                        mouse_startX -= 1; 
+                        sendFixedHexData("FF 02 00 F6 00 00 00 00 00 00 01 FE");//	-10
+                        break;
+                    case 'ArrowRight': 
+                        mouse_startX += 1; 
+                        sendFixedHexData("FF 02 00 0A 00 00 00 00 00 00 01 FE");//	10
+                        break;
+                }
+                mouse_updateMeasureArea();
+                event.preventDefault();
+            }
+            if (event.key === 'r' && event.metaKey) {
+                location.reload(); // 重新加载页面
+            }
+        });
+
+        // 初始化测量区域的位置和比值
+        mouse_updateMeasureArea();
+
+		// 初始化全局变量 wheel
+		let wheel = 0;
+
+		// 获取 DOM 元素
+		const mouseWheelElement = document.getElementById('mouse_wheel');
+		const buttonUp = document.getElementById('wheel_up');
+		const buttonDown = document.getElementById('wheel_down');
+
+		// 更新显示的值
+		function updateMouseWheelDisplay() {
+		    mouseWheelElement.textContent = wheel;
+		}
+
+		// 定义滚轮向上和向下的操作函数
+		function wheelUpandDown(direction) {
+		    if (direction === 'up') { ////单一流程最大重复次数
+		        wheel++;
+		        sendFixedHexData("FF 02 00 00 00 01 00 00 00 00 01 FE");//滚轮向上
+		    } else if (direction === 'down') {
+		        wheel--;
+		        sendFixedHexData("FF 02 00 00 00 FF 00 00 00 00 01 FE");//滚轮向下
+		    }
+		    updateMouseWheelDisplay();
+		}
+
+		// 初始化按钮状态
+		updateMouseWheelDisplay();        
+    </script>	
+</body>
+</html>

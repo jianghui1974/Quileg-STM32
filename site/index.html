@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quileg STM32（第一代 / 第二代）· 开源归档</title>
+<meta name="description" content="Quileg 前两代固件的完整源码、网页上位机与串口协议文档。一台以标准 USB 键盘鼠标身份工作的小设备，2024–2025 年的最终版本，已开源归档。">
+<meta name="theme-color" content="#0b2a5b">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="./" aria-label="Quileg STM32 首页">
+    <img src="assets/logo.svg" alt="" width="30" height="30">
+    <span>Quileg <b>STM32</b></span>
+  </a>
+  <nav class="site-nav" aria-label="主导航">
+    <a href="#features">能做什么</a>
+    <a href="#how">怎么工作</a>
+    <a href="#assistant">上位机</a>
+    <a href="#lineage">两代</a>
+    <a href="#start">开始</a>
+    <a href="commands.html">命令字典</a>
+    <a href="#docs">文档</a>
+    <a href="#faq">常见问题</a>
+  </nav>
+  <a class="btn btn-ghost btn-sm" data-repo href="https://github.com/jianghui1974/Quileg-STM32">GitHub</a>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">2024 – 2025 · 第一代 / 第二代 · 已归档</p>
+    <h1>让电脑<br><em>自己动手</em></h1>
+    <p class="lead">
+      一台以<strong>标准 USB 键盘与鼠标</strong>身份工作的小设备：把编排好的操作真实地按出来，
+      目标软件不需要任何接口，电脑上也不需要安装客户端。
+    </p>
+    <p class="lead lead-sub">
+      这里是它的<strong>前两代</strong>——固件源码、网页上位机、串口协议与开发备忘，按当年的最终版本开源。
+    </p>
+    <div class="badges">
+      <span>MIT</span><span>STM32F103C8T6</span><span>USB HID 复合设备</span><span>9600 串口</span><span>已归档</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn" data-repo href="https://github.com/jianghui1974/Quileg-STM32">查看源码</a>
+      <a class="btn btn-ghost" href="#start">快速开始</a>
+    </div>
+  </div>
+  <figure class="hero-shot">
+    <img src="assets/product-cases.png" alt="Quileg 设备多种外壳版本合影：白色、蓝色、黄色外壳，以及紫色多机组合">
+    <figcaption>左：白 / 蓝 / 黄三种外壳（第一代）　右：紫色多机组合（内置 USB HUB）</figcaption>
+  </figure>
+</section>
+
+<section class="notice">
+  <div class="notice-inner">
+    <p><strong>先说明白：</strong>这是已停止维护的历史项目，前两代当年未公开发布，现在按“原样”开源，用于学习、复刻与留档。<strong>不提供技术支持与维护</strong>，也不提供任何补丁。</p>
+    <p>当前项目是第三代 <a href="https://jianghui1974.github.io/Quileg-HID/">Quileg HID</a>——ESP32-S3 走蓝牙，目标从电脑换成手机，让 AI 直接操作 iPhone。</p>
+  </div>
+</section>
+
+<section id="features" class="alt">
+  <div class="section-head">
+    <p class="kicker">能力</p>
+    <h2>屏幕上能手动做的，它就能替你做</h2>
+    <p class="sub">不注入、不破解、不修改目标软件——只是代替手指去按键、去移动鼠标。</p>
+  </div>
+  <div class="cards">
+    <article class="card">
+      <h3>硬件级键鼠模拟</h3>
+      <p>设备以标准 HID 键鼠身份出现，<strong>无需安装驱动</strong>。电脑眼里它就是一键盘加一鼠标。</p>
+    </article>
+    <article class="card">
+      <h3>不依赖软件接口</h3>
+      <p>没有 API、老系统、专用客户端——只要是屏幕上能点的操作，就能被流程复现。</p>
+    </article>
+    <article class="card">
+      <h3>完整键鼠能力</h3>
+      <p>字母/数字/符号/功能键，修饰键任意组合，最多 6 键同按；左中右键、X/Y 位移、滚轮、拖拽。</p>
+    </article>
+    <article class="card">
+      <h3>流程即文件</h3>
+      <p>流程是纯文本 <code>.quileg</code>：一行一条指令 + 中文注释，可导入导出、可版本管理。</p>
+    </article>
+  </div>
+</section>
+
+<section id="how">
+  <div class="section-head">
+    <p class="kicker">原理</p>
+    <h2>三段式：编排 → 串口 → USB 报告</h2>
+    <p class="sub">所有逻辑都在上位机，板子只负责“把收到的指令变成真实的按键与位移”。</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <span class="num">1</span>
+      <h3>网页助手编排</h3>
+      <p>在 Chrome / Edge 里打开单文件网页，用 Web Serial 连上设备，拖拽编辑流程。</p>
+    </div>
+    <div class="flow-arrow" aria-hidden="true">→</div>
+    <div class="flow-step">
+      <span class="num">2</span>
+      <h3>12 字节串口帧</h3>
+      <p>9600 8N1，<code>FF</code> + 10 字节 + <code>FE</code>。键盘、鼠标、蜂鸣器各一种类型。</p>
+    </div>
+    <div class="flow-arrow" aria-hidden="true">→</div>
+    <div class="flow-step">
+      <span class="num">3</span>
+      <h3>USB HID 报告</h3>
+      <p>固件把指令转成键盘/鼠标 HID 报告，通过 USB 发给电脑——系统看到的是真实输入。</p>
+    </div>
+  </div>
+
+  <div class="frame-demo">
+    <div class="frame-head">一帧长这样：<code>⌘ + H</code>（按住 100 ms）</div>
+    <pre><code><span class="tok">FF</span> <span class="tok">01</span> <span class="tok">08</span> <span class="tok">0A</span> <span class="tok">0B</span> 00 00 00 00 00 00 <span class="tok">FE</span>
+│  │  │  │  └─ 键码 0x0B = h
+│  │  │  └─ 按住 0x0A × 10ms = 100ms
+│  │  └─ 修饰键 0x08 = 左 GUI（⌘）
+│  └─ 键盘命令
+└─ 帧头</code></pre>
+    <p class="frame-note">设备执行完会把同一帧回显回来，可当作 ACK。</p>
+  </div>
+</section>
+
+<section id="assistant">
+  <div class="section-head">
+    <p class="kicker">上位机</p>
+    <h2>一个网页，就是控制台</h2>
+    <p class="sub">不用装客户端：桌面版 Chrome / Edge 打开一个 HTML，用 Web Serial 连上设备就能用。没有后端、没有账号，流程也不上传。</p>
+  </div>
+
+  <figure class="wide-shot">
+    <img src="assets/assistant-main.webp" alt="Quileg 助手主界面：左侧连接与暂存夹，右侧是可拖拽的操作流" loading="lazy">
+    <figcaption>主界面：左边连接设备 / 暂存夹，右边是可拖拽、可嵌套的操作流。截图里载入的是页面自带的苹果设备范例。</figcaption>
+  </figure>
+
+  <div class="shot-grid">
+    <figure>
+      <a href="assets/assistant-keyboard.webp" target="_blank" rel="noopener"><img src="assets/assistant-keyboard.webp" alt="软键盘面板：Mac / Windows 布局，点键直接生成十六进制指令" loading="lazy"></a>
+      <figcaption><strong>软键盘</strong>：Mac / Windows 两套布局，点一个键就生成对应帧，可设按住时长后加入流程。</figcaption>
+    </figure>
+    <figure>
+      <a href="assets/assistant-mouse.webp" target="_blank" rel="noopener"><img src="assets/assistant-mouse.webp" alt="鼠标面板：归位、移动到目标区域、滚轮与按键" loading="lazy"></a>
+      <figcaption><strong>鼠标面板</strong>：归位到四角、按目标区域位移、滚轮与按键，都能一键加进操作流。</figcaption>
+    </figure>
+  </div>
+
+  <div class="assistant-facts">
+    <div><h3>流程拖拽 + 嵌套</h3><p>一行一条 hex，拖拽排序；嵌套一层就是"一组操作"，读起来像脚本。</p></div>
+    <div><h3>预设 + 批量</h3><p>空操作 / 返回主页 / 截屏等常用帧是按钮；粘贴一大段 hex 可以批量生成条目。</p></div>
+    <div><h3>纯前端</h3><p>单个 HTML，没有服务器；连接串口需要浏览器授权，页面不会自己连。</p></div>
+  </div>
+
+  <p class="assistant-note">截图是在<strong>没有连接设备</strong>的情况下跑起来的——界面本身可以随便点；真正执行需要插上板子，并在 Chrome / Edge 里授权串口。</p>
+  <p class="assistant-link"><a class="btn btn-ghost btn-sm" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/tools/web-assistant/quileg-assistant.html">下载仓库里的助手，自己点一点</a></p>
+</section>
+
+<section id="lineage" class="alt">
+  <div class="section-head">
+    <p class="kicker">两代</p>
+    <h2>同一个内核，两次演进</h2>
+    <p class="sub">都是 STM32F103 + USB HID 复合键鼠；第三代才换掉整个形态。</p>
+  </div>
+
+  <div class="gen-list">
+    <article class="gen">
+      <div class="gen-year">2024 · 第一代</div>
+      <h3>Quileg 程控键鼠模拟器</h3>
+      <ul>
+        <li>STM32F103C8T6 + <strong>0.96" 128×64 OLED</strong>（中景园 ZJY096I0400WG01，SSD1306，软件 I²C，实时显示位移/按键/滚轮）</li>
+        <li>7 个面板按键、LED、USB 有线键鼠</li>
+        <li>做过黄 / 白 / 蓝三种外壳</li>
+      </ul>
+    </article>
+    <article class="gen">
+      <div class="gen-year">2025 · 第二代</div>
+      <h3>去屏、加蜂鸣器、支持多机</h3>
+      <ul>
+        <li>去掉屏幕，新增 <strong>蜂鸣器（PA4）</strong>与 <strong>PA0 板上开关</strong></li>
+        <li>外壳<strong>内置 USB HUB</strong>：多块板子并排/堆叠，一根线出到电脑，上位机开多个页面分别控制</li>
+        <li>固件带一段<strong>上电自检</strong>（会按一次截屏快捷键；不提供补丁，需自行改源码）</li>
+      </ul>
+    </article>
+    <article class="gen gen-next">
+      <div class="gen-year">2026 · 第三代</div>
+      <h3>Quileg HID</h3>
+      <ul>
+        <li>换成 ESP32-S3，走<strong>蓝牙</strong>，不再插线</li>
+        <li>目标从电脑换成手机：AirPlay 投屏 + AI 闭环操作 iPhone</li>
+        <li>独立项目：<a href="https://jianghui1974.github.io/Quileg-HID/">jianghui1974.github.io/Quileg-HID</a></li>
+      </ul>
+    </article>
+  </div>
+
+  <figure class="wide-shot">
+    <img src="assets/product-oled-in-use.png" alt="四台第一代 Quileg 设备通电使用，OLED 显示运行状态">
+    <figcaption>第一代通电使用中。OLED 上的 <code>S H:</code> / <code>V:</code> / <code>B L R M</code> / <code>W</code> / <code>K</code> 就是固件里写死的标签。</figcaption>
+  </figure>
+
+  <figure class="wide-shot">
+    <img src="assets/gen2-case-ports.jpg" alt="第二代紫色外壳的一端：两个 USB-C 接口与一个三档旋钮">
+    <figcaption>第二代紫色外壳：一端 <strong>2 个 USB-C + 三档旋钮</strong>，另一端 1 个 USB-C。旋钮用来<strong>切换内置 HUB 的连接方式</strong>（关机 / 被控 / 自控）；硬件已在生产机上做出来，配套应用软件未开发。</figcaption>
+  </figure>
+</section>
+
+<section id="start">
+  <div class="section-head">
+    <p class="kicker">开始</p>
+    <h2>从零到能按，三步</h2>
+    <p class="sub">不需要画 PCB：主控板用的是现成的 <strong>Nano STM32 V1.1</strong>（慧勤智远，60×50mm）。</p>
+  </div>
+
+  <ol class="start-steps">
+    <li>
+      <h3>准备硬件</h3>
+      <p><strong>Nano STM32 V1.1</strong>（慧勤智远，60×50mm）或同规格 STM32F103C8T6 板：8 MHz + 32.768 kHz 晶振、原生 USB（键鼠）、CH340X 串口。OLED、7 个按键、蜂鸣器按文档引脚表接到扩展排针。</p>
+      <p class="hint">第一代有屏；第二代无屏但有蜂鸣器。板载 LED0 = PA8、WK_UP = PA0。</p>
+    </li>
+    <li>
+      <h3>编译并烧录</h3>
+      <p>用 STM32CubeIDE 打开 <code>firmware/gen2-2025/</code>，Build，再用 ST-Link 烧录。</p>
+      <p class="hint">⚠️ 若在 CubeMX 里点过 Generate Code，必须用仓库里的 <code>usbd_hid</code> 覆盖文件替换，否则只剩键盘或鼠标。</p>
+    </li>
+    <li>
+      <h3>打开网页助手</h3>
+      <p>用桌面版 Chrome / Edge 打开 <code>tools/web-assistant/quileg-assistant.html</code>，连接串口，导入 <code>examples/</code> 里的示例流程。</p>
+      <p class="hint">首次打开需要联网（前端库走 CDN）。</p>
+    </li>
+  </ol>
+
+  <div class="callout">
+    <strong>第二代用户注意：</strong>上电自检会移动鼠标并按下截屏快捷键。归档版<strong>不提供补丁</strong>；要当日常设备用，请自行修改 <code>Core/Src/main.c</code> 并重新编译。
+  </div>
+</section>
+
+<section id="protocol" class="alt">
+  <div class="section-head">
+    <p class="kicker">协议</p>
+    <h2>四种命令，12 字节一帧</h2>
+    <p class="sub">协议两代完全一致——同一份流程文件、同一个网页助手，两代都能用。</p>
+  </div>
+
+  <div class="proto-grid">
+    <div class="proto-card">
+      <h3><code>0x01</code> 键盘</h3>
+      <p><code>[1]</code> 修饰键位图 · <code>[2]</code> 按住时长（×10ms，0 = 按住不放） · <code>[3]–[8]</code> 最多 6 个键码 · <code>[9]</code> 重复次数</p>
+    </div>
+    <div class="proto-card">
+      <h3><code>0x02</code> 鼠标</h3>
+      <p><code>[1]</code> 按键（左 0x01 / 右 0x02 / 中 0x04） · <code>[2]</code> X · <code>[3]</code> Y · <code>[4]</code> 滚轮（有符号 8 位）</p>
+    </div>
+    <div class="proto-card">
+      <h3><code>0x03</code> 蜂鸣器</h3>
+      <p>响 30 ms，并翻转一次 LED。其余字节忽略。</p>
+    </div>
+    <div class="proto-card">
+      <h3><code>0x00</code> 空操作</h3>
+      <p>保留。可用于占位或给上位机控制节奏。</p>
+    </div>
+  </div>
+
+  <p class="proto-note">
+    ⚠️ 串口收包是<strong>单缓冲</strong>、键盘按住会<strong>阻塞主循环</strong>——上位机必须按节奏发送，不能连发。
+    另外坐标是<strong>相对的</strong>（每帧 ≤ ±127），所以流程里要先“归位”再相对移动。
+  </p>
+
+  <p class="proto-link"><a class="btn btn-ghost btn-sm" data-doc="protocol.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/protocol.md">读完整协议文档</a></p>
+</section>
+
+<section id="docs">
+  <div class="section-head">
+    <p class="kicker">文档</p>
+    <h2>该讲的都写了</h2>
+    <p class="sub">从引脚、协议、架构，到编译烧录、救砖、迭代史与开发备忘。</p>
+  </div>
+
+  <div class="doc-grid">
+    <a class="doc-card" href="commands.html">
+      <h3>命令字典 <span aria-hidden="true">→</span></h3><p>完整字节命令表 + 逐字节拆解（本页）</p>
+    </a>
+    <a class="doc-card" data-doc="protocol.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/protocol.md">
+      <h3>串口协议</h3><p>帧结构、字段、键码表、时序与丢帧约束</p>
+    </a>
+    <a class="doc-card" data-doc="hardware.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/hardware.md">
+      <h3>硬件说明</h3><p>引脚与脚号、USB 描述符、两代差异、主控板说明</p>
+    </a>
+    <a class="doc-card" data-doc="architecture.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/architecture.md">
+      <h3>固件结构</h3><p>分层、启动流程、数据通路、已知限制</p>
+    </a>
+    <a class="doc-card" data-doc="build-and-flash.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/build-and-flash.md">
+      <h3>编译与烧录</h3><p>CubeIDE 导入、ST-Link、usbd_hid 覆盖、救砖</p>
+    </a>
+    <a class="doc-card" data-doc="history.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/history.md">
+      <h3>迭代史</h3><p>32 个工程版本时间线、两代代码差异</p>
+    </a>
+    <a class="doc-card" data-doc="development-notes.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/development-notes.md">
+      <h3>开发备忘</h3><p>脚号与丝印、早期原型、项目副本流程</p>
+    </a>
+    <a class="doc-card" data-doc="faq.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/faq.md">
+      <h3>常见问题</h3><p>能不能复刻、中文输入、多机并联、救砖</p>
+    </a>
+    <a class="doc-card" data-doc="legal-and-safety.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/legal-and-safety.md">
+      <h3>使用边界</h3><p>合法使用、隐私、免责</p>
+    </a>
+  </div>
+</section>
+
+<section id="faq" class="alt">
+  <div class="section-head">
+    <p class="kicker">常见问题</p>
+    <h2>你可能想问</h2>
+  </div>
+  <div class="faq">
+    <details>
+      <summary>还能买到成品吗？</summary>
+      <p>不能。前两代从未公开发布，也没有量产销售。这是当年源码的归档。</p>
+    </details>
+    <details>
+      <summary>能自己做一台吗？</summary>
+      <p>能。买一块 STM32F103C8T6 最小系统板，按引脚表接 OLED / 按键 / 蜂鸣器 / LED 即可，不需要画 PCB。仓库不提供原理图、PCB、BOM 与外壳文件。</p>
+    </details>
+    <details>
+      <summary>支持 Windows / Linux 吗？</summary>
+      <p>设备是标准 USB HID 键鼠，理论上三大系统都认。当年主要在 macOS 上使用，Windows / Linux 未做系统验证。</p>
+    </details>
+    <details>
+      <summary>中文能输入吗？</summary>
+      <p>不能直接打中文——设备只会发 HID 键码，等于敲 ASCII。当年的做法是用系统输入法选词，或先把中文放进剪贴板再 <code>⌘/Ctrl + V</code> 粘贴。</p>
+    </details>
+    <details>
+      <summary>官网说的“多机并联”是怎么实现的？</summary>
+      <p>靠外壳<strong>内置的 USB HUB</strong>：多块板子各自作为独立 HID 设备枚举，一根线出到电脑。固件没有主从协议，网页助手在「连接」时选不同串口、开多个浏览器页面分别控制。</p>
+    </details>
+    <details>
+      <summary>会被平台判定为作弊 / 封号吗？</summary>
+      <p>从设备角度它发出的是真实 USB 键鼠事件，与人工输入在系统层面没有区别；但平台仍可能按行为特征做风控。请只在你有权操作的设备与账号上使用，并遵守平台条款。</p>
+    </details>
+    <details>
+      <summary>为什么不再维护了？</summary>
+      <p>“稳定地替人点电脑”这件事已经被更好的形态取代：能用接口/网页拿数据就用接口，需要操作真实界面时则用投屏 + AI 闭环（第三代）。</p>
+    </details>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>源码、上位机、协议，都在仓库里</h2>
+  <p>MIT 许可（ST 组件保留原许可）。已归档，不再维护，但足够你把一台设备做出来。</p>
+  <div class="cta-row center">
+    <a class="btn" data-repo href="https://github.com/jianghui1974/Quileg-STM32">打开仓库</a>
+    <a class="btn btn-ghost" href="https://jianghui1974.github.io/Quileg-HID/">看第三代 Quileg HID</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="foot-about">
+      <img src="assets/logo.svg" alt="" width="26" height="26">
+      <p><strong>Quileg STM32</strong><br>前两代固件与工具的开源归档。2024–2025。</p>
+    </div>
+    <div>
+      <h4>项目</h4>
+      <ul>
+        <li><a data-repo href="https://github.com/jianghui1974/Quileg-STM32">源码仓库</a></li>
+        <li><a data-doc="history.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/history.md">迭代史</a></li>
+        <li><a href="https://jianghui1974.github.io/Quileg-HID/">第三代 Quileg HID</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>文档</h4>
+      <ul>
+        <li><a data-doc="protocol.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/protocol.md">串口协议</a></li>
+        <li><a data-doc="build-and-flash.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/build-and-flash.md">编译与烧录</a></li>
+        <li><a data-doc="faq.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/faq.md">常见问题</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>许可</h4>
+      <ul>
+        <li><a href="https://github.com/jianghui1974/Quileg-STM32/blob/main/LICENSE">LICENSE（MIT）</a></li>
+        <li><a data-doc="licenses/README.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/licenses/README.md">第三方组件</a></li>
+        <li><a data-doc="legal-and-safety.md" href="https://github.com/jianghui1974/Quileg-STM32/blob/main/docs/legal-and-safety.md">使用边界</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <p>作者 JIANG HUI · 联系 <a href="mailto:contact@airdiode.com">contact@airdiode.com</a></p>
+    <p>与 Apple、STMicroelectronics、Arm 无隶属关系。Apple、iPhone、iPad、macOS、STM32、Cortex 等为其各自所有者的商标。</p>
+  </div>
+</footer>
+
+</body>
+</html>

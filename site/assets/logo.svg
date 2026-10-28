@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Quileg STM32">
+  <rect width="64" height="64" rx="14" fill="#1f6bff"/>
+  <rect x="13" y="15" width="38" height="24" rx="6" fill="none" stroke="#ffffff" stroke-width="3.5"/>
+  <path d="M26.5 25.5 L40 32 L33.6 33.9 L37 41.2 L33.2 43 L29.8 35.7 L25 39.4 Z" fill="#ff7a29"/>
+  <rect x="18" y="47" width="8" height="4" rx="2" fill="#ffffff" opacity=".85"/>
+  <rect x="28" y="47" width="8" height="4" rx="2" fill="#ffffff" opacity=".6"/>
+  <rect x="38" y="47" width="8" height="4" rx="2" fill="#ffffff" opacity=".35"/>
+</svg>
